@@ -11,6 +11,7 @@ TRD_MODULES = [
     "cleargate.core.states",
     "cleargate.core.config",
     "cleargate.core.errors",
+    "cleargate.core.logging",
     "cleargate.ingest.validator",
     *(
         f"cleargate.extract.{m}"
