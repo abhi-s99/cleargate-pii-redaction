@@ -1,0 +1,24 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.0
+    hooks:
+      - id: ruff-check
+      - id: ruff-format
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+  - repo: local
+    hooks:
+      - id: no-emoji-no-em-dash
+        name: no emoji / no em dash
+        entry: python scripts/check_style.py
+        language: python
+        types: [text]
+      - id: no-sample-files
+        name: block confidential sample files
+        entry: sample files must never be committed
+        language: fail
+        files: '(^|/)(samples|Data|eval/gold|out)/|\.(pdf|docx|pptx)$'
+        exclude: '^tests/fixtures/synthetic/'

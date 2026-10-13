@@ -1,0 +1,95 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cleargate"
+version = "0.0.0"
+description = "Privacy gate between business documents and AI models (Optiv PS-2 case study)"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+# Exact pins, resolved on 13 Oct 2026 (Python 3.13.15, Windows 11). See docs/phases/PHASE-00-bootstrap.md.
+dependencies = [
+    "fastapi==0.143.0",
+    "uvicorn==0.54.0",
+    "python-multipart==0.0.32",
+    "httpx==0.28.1",
+    "pydantic==2.14.1",
+    "pyyaml==6.0.3",
+    "typer==0.27.3",
+    "streamlit==1.65.0",
+    "pymupdf==1.28.2",
+    "pdfplumber==0.11.10",
+    "python-docx==1.2.0",
+    "python-pptx==1.0.2",
+    "lxml==6.1.3",
+    "defusedxml==0.7.1",
+    "pytesseract==0.3.13",
+    "presidio-analyzer==2.2.364",
+    "spacy==3.8.16",
+    "phonenumbers==9.0.41",
+    "rapidfuzz==3.14.6",
+    "opencv-python-headless==4.14.0.94",
+    "pyahocorasick==2.3.1",
+    "cryptography==50.0.2",
+    "pillow==12.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.1.1",
+    "hypothesis==6.169.0",
+    "pytest-socket==0.8.1",
+    "pytest-cov==7.1.0",
+    "ruff==0.17.0",
+    "mypy==2.4.0",
+    "types-PyYAML==6.0.12.20260906",
+    "pre-commit==4.7.0",
+    "detect-secrets==1.5.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["cleargate*"]
+
+[tool.setuptools.package-data]
+cleargate = ["py.typed"]
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --disable-socket"
+markers = [
+    "samples: needs the confidential sample files (skipped when absent)",
+    "slow: long-running (OCR, full pipeline)",
+]
+xfail_strict = true
+# Blocked sockets still raise SocketBlockedError; the extra UserWarning is noise.
+filterwarnings = ["ignore:A test tried to use socket:UserWarning"]
+
+# ---------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["tests/fixtures/synthetic"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "S", "PT"]
+ignore = ["S101"]  # assert is idiomatic in pytest
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S108", "S311", "S603", "S607"]
+"scripts/**" = ["S603", "S607"]
+
+# ---------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+warn_unused_configs = true
+ignore_missing_imports = true
+files = ["cleargate"]
+
+# Strict on the safety-critical packages (brief section 4.1).
+[[tool.mypy.overrides]]
+module = ["cleargate.core.*", "cleargate.gate.*", "cleargate.verify.*"]
+strict = true
