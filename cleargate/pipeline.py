@@ -264,8 +264,13 @@ def reopens(path: Path, fmt: FileFormat) -> bool:
 
 
 def default_stages() -> Stages:
+    from cleargate.extract.docx import DocxExtractor
+    from cleargate.extract.image import ImageExtractor
+    from cleargate.extract.pdf import PdfExtractor
+    from cleargate.extract.pptx import PptxExtractor
+
     return Stages(
-        extractors=[RegisterOnlyExtractor()],
+        extractors=[PdfExtractor(), DocxExtractor(), PptxExtractor(), ImageExtractor()],
         detector=NoopDetector(),
         writer=IdentityWriter(),
         verifier=CoverageOnlyVerifier(),

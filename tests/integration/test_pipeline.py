@@ -58,12 +58,17 @@ def states(store: MetaStore, job_id: str) -> list[str]:
     return [r["to_state"] for r in store.history(job_id)]
 
 
+def stub_stages() -> Stages:
+    """The Phase 2 skeleton: an extractor that inspects nothing."""
+    return replace(default_stages(), extractors=[RegisterOnlyExtractor()])
+
+
 @pytest.mark.parametrize("ext", sorted(BUILDERS))
 def test_valid_file_ends_blocked_by_g3(
     tmp_path: Path, settings: Settings, policy: Policy, store: MetaStore, ext: str
 ) -> None:
     path = BUILDERS[ext](tmp_path / f"input.{ext}")
-    job_id, _ = run(Pipeline(settings, policy, store), path)
+    job_id, _ = run(Pipeline(settings, policy, store, stages=stub_stages()), path)
     job = store.get_job(job_id)
     assert job["state"] == "BLOCKED"
     assert job["rule"] == "G3"
@@ -140,16 +145,17 @@ def crashing(stage: str, exc: Exception) -> Stages:
     def raise_(*_a: object, **_k: object) -> None:
         raise exc
 
-    target = {
-        "extract": s.extractors[0],
-        "detect": s.detector,
-        "redact": s.writer,
-        "verify": s.verifier,
+    targets = {
+        "extract": list(s.extractors),  # every format's extractor
+        "detect": [s.detector],
+        "redact": [s.writer],
+        "verify": [s.verifier],
     }[stage]
     method = {"extract": "extract", "detect": "detect", "redact": "apply", "verify": "verify"}[
         stage
     ]
-    setattr(target, method, raise_)
+    for target in targets:
+        setattr(target, method, raise_)
     return s
 
 
@@ -223,7 +229,7 @@ def test_stage_timings_and_progress(
         settings, policy, store, progress=lambda _j, s, d, _t: events.append((s, d))
     )
     (job,) = pipeline.process_batch([filegen.pdf(tmp_path / "x.pdf")]).jobs
-    assert set(job.timings) == {"validate", "extract", "detect", "redact", "verify", "gate"}
+    assert {"validate", "extract", "detect", "redact", "verify", "gate"} <= set(job.timings)
     assert ("extract", 0) in events
     assert ("extract", 1) in events
 

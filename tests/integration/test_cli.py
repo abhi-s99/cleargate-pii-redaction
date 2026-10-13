@@ -71,3 +71,16 @@ def test_extract_rejects_invalid_file(tmp_path: Path, env: dict[str, str]) -> No
     result = runner.invoke(app, ["extract", str(f)], env=env)
     assert result.exit_code == 2
     assert "EXTENSION_MISMATCH" in result.output
+
+
+def test_extract_dump_on_fixture_hides_planted_values(env: dict[str, str]) -> None:
+    from tests.fixtures.manifest import SYNTHETIC, planted_items
+
+    result = runner.invoke(app, ["extract", str(SYNTHETIC / "planted.pptx"), "--dump"], env=env)
+    assert result.exit_code == 0, result.output
+    assert '"slides": 3' in result.output
+    assert not [
+        i.value for i in planted_items() if i.file == "planted.pptx" and i.value in result.output
+    ]
+    shown = runner.invoke(app, ["extract", str(SYNTHETIC / "planted.pptx"), "--show-text"], env=env)
+    assert "Anselm Kittredge" in shown.output
