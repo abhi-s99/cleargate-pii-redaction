@@ -9,6 +9,7 @@ import pytest
 TRD_MODULES = [
     "cleargate.core.models",
     "cleargate.core.states",
+    "cleargate.core.config",
     "cleargate.core.errors",
     "cleargate.ingest.validator",
     *(

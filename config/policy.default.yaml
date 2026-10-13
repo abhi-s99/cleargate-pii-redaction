@@ -1,0 +1,47 @@
+# ClearGate default policy (TRD section 11). Canonicalised and hashed into policy_hash;
+# every job and report records that hash. Unknown keys are rejected at load time.
+policy_name: cadence-default
+entities:
+  enabled: [PERSON, EMAIL_ADDRESS, PHONE_NUMBER, EMPLOYEE_ID, US_SSN, IN_PAN, PL_PESEL,
+            PASSPORT, TAX_ID, DATE_OF_BIRTH, HOME_ADDRESS, FINANCIAL_PARTIAL, PAYMENT_CARD, PHOTO]
+  # TR-DT-10 defaults, including the OCR variant EMP.NNNNN
+  employee_id_patterns: ['EMP-\d{5}', 'DIR-\d{4}', 'MER-[A-Z]{2}-\d{4}', 'EMP\.\d{5}']
+keep:
+  organisations: true
+  role_titles: true            # quasi-identifier risk, see README limitations
+  corporate_addresses: true
+  non_dob_dates: true
+allowlist:
+  organisations: [Cadence, Cadence Financial Group, Optiv, Halloran & Pike LLP, Northwind Analytics, Meridian Staffing, Veritrace Screening Services]
+  products: [OneTrust, Ironclad, Torii]
+  auto_learn_orgs: true        # corporate suffix / vendor context
+detection:
+  ner_model: en_core_web_lg
+  review_threshold: 0.40       # calibrated; see TR-DT-30
+  surname_only_propagation: true
+  fuzzy_ocr_ratio: 90
+ocr:
+  dpi: 300
+  min_native_chars: 25
+  word_conf_floor: 60
+  unreadable_region: {min_area_ratio: 0.02, max_mean_conf: 70}
+  unreadable_policy: mask_and_review     # mask_and_review | mask_only | block
+  timeout_s_per_page: 120
+redaction:
+  token_style: typed_numbered            # typed_numbered | typed | fixed
+  pdf_padding_px: 3
+verification:
+  srs_min: 0.80
+  verify_ocr_dpi: 300                     # candidate optimisation: 200 (to be measured)
+retention:
+  job_ttl_hours: 24
+llm:
+  enabled: false
+# Validation limits (TRD section 2, "configurable")
+limits:
+  max_file_bytes: 52428800       # 50 MB
+  max_pdf_pages: 300
+  max_uncompressed_bytes: 262144000   # 250 MB
+  max_compression_ratio: 100
+  max_files_per_batch: 20
+  max_image_megapixels: 80
