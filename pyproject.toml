@@ -80,6 +80,8 @@ ignore = ["S101"]  # assert is idiomatic in pytest
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S105", "S106", "S108", "S311", "S603", "S607"]
 "scripts/**" = ["S603", "S607"]
+# Schema SQL is assembled from JobState constants only, never from input.
+"cleargate/core/db.py" = ["S608"]
 
 # ---------------------------------------------------------------- mypy
 [tool.mypy]

@@ -47,6 +47,7 @@ class ErrorCode(StrEnum):
     ILLEGAL_TRANSITION = "ILLEGAL_TRANSITION"
     HANDLE_INVALID = "HANDLE_INVALID"
     HANDOFF_REFUSED = "HANDOFF_REFUSED"
+    JOB_NOT_FOUND = "JOB_NOT_FOUND"
     INTERNAL = "INTERNAL"
 
 
@@ -74,6 +75,7 @@ _TEMPLATES: dict[ErrorCode, str] = {
     ErrorCode.ILLEGAL_TRANSITION: "Transition {from_state} -> {to_state} is not allowed",
     ErrorCode.HANDLE_INVALID: "SafeHandle verification failed ({reason})",
     ErrorCode.HANDOFF_REFUSED: "Handoff refused ({reason})",
+    ErrorCode.JOB_NOT_FOUND: "Job not found",
     ErrorCode.INTERNAL: "Internal error in stage {stage}",
 }
 
