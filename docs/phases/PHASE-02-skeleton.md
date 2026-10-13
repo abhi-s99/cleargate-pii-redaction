@@ -80,6 +80,11 @@ Success: no issues found in 62 source files.
   sanitized output (`test_safe_path_mints_a_handle_over_the_sanitized_output`).
 - *Hostile input:* XXE and billion-laughs `[Content_Types].xml`, zip bomb by ratio and by
   total size, encrypted zip entries, broken zip, truncated PNG, corrupt PDF: all `FAILED`.
+- *Property test caught a test bug:* while committing, the hypothesis property "adding a
+  fault never relaxes the outcome" failed (FAILED became BLOCKED). The cause was the test's
+  "check not run" fault, which replaced `checks_run` and could add V1 back; the rules were
+  right. The fault now only removes checks (commit `test(gate): make check faults only
+  remove checks`); 200-example CI profile and repeated runs pass.
 - *ACL check:* on this Windows machine `icacls` on a job dir lists exactly one entry, the
   current user with full control.
 
