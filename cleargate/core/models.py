@@ -193,14 +193,24 @@ class RedactionAction(_Model):
     error_code: str | None = None
 
 
+CheckId = Literal["V1", "V2", "V3", "V4", "V5", "V6"]
+ALL_CHECKS: frozenset[CheckId] = frozenset({"V1", "V2", "V3", "V4", "V5", "V6"})
+
+
 class VerificationReport(_Model):
     """Outcome of checks V1..V6 (TRD 8.1) as the gate reads them. Counts only, no values.
 
     Phase 7 produces it from the independent re-extraction path; the gate (Phase 1)
     only consumes it. ``verifiers`` records name -> version for reproducibility.
+
+    ``checks_run`` lists the checks that actually executed. It defaults to empty, so a
+    report that does not say a check ran is treated as if that check failed (ADR-24):
+    V1 missing is G0, V2..V5 missing is G3 (an uninspected verification dimension),
+    V6 missing is G6.
     """
 
     job_id: str
+    checks_run: frozenset[CheckId] = frozenset()
     reopen_ok: bool  # V1
     leak_hits: int = Field(0, ge=0)  # V2
     residual_deterministic: int = Field(0, ge=0)  # V3, blocking

@@ -22,7 +22,13 @@ from hypothesis.stateful import RuleBasedStateMachine, invariant, rule
 
 from cleargate.core.db import ALLOWED_TRANSITIONS
 from cleargate.core.errors import ClearGateError, ErrorCode
-from cleargate.core.models import Coverage, Locator, RedactionAction, VerificationReport
+from cleargate.core.models import (
+    ALL_CHECKS,
+    Coverage,
+    Locator,
+    RedactionAction,
+    VerificationReport,
+)
 from cleargate.core.states import JobState
 from cleargate.gate.handle import SafeHandle, verify_against_store
 from cleargate.gate.machine import decide, is_allowed, transition
@@ -42,6 +48,7 @@ SEVERITY = {
 reports = st.builds(
     VerificationReport,
     job_id=st.just("job-1"),
+    checks_run=st.frozensets(st.sampled_from(sorted(ALL_CHECKS))) | st.just(ALL_CHECKS),
     reopen_ok=st.booleans(),
     leak_hits=st.integers(0, 2),
     residual_deterministic=st.integers(0, 2),
@@ -92,6 +99,7 @@ FAULTS: list[tuple[str, dict[str, Any]]] = [
     ("uninspected", {"coverage": Coverage(uninspected=[Locator(part="unmaskable")])}),
 ]
 VER_FAULTS: list[dict[str, Any]] = [
+    *({"checks_run": ALL_CHECKS - {c}} for c in sorted(ALL_CHECKS)),
     {"reopen_ok": False},
     {"leak_hits": 1},
     {"residual_deterministic": 1},

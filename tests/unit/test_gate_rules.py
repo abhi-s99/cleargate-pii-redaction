@@ -8,7 +8,13 @@ from typing import Any
 import pytest
 
 from cleargate.core.errors import ErrorCode
-from cleargate.core.models import Coverage, Locator, RedactionAction, VerificationReport
+from cleargate.core.models import (
+    ALL_CHECKS,
+    Coverage,
+    Locator,
+    RedactionAction,
+    VerificationReport,
+)
 from cleargate.core.states import JobState
 from cleargate.gate.rules import GateInput, evaluate, triggered
 
@@ -21,7 +27,13 @@ Case = tuple[dict[str, Any], dict[str, Any] | None]
 
 
 def build(top: dict[str, Any], ver: dict[str, Any] | None) -> GateInput:
-    base_ver: dict[str, Any] = {"job_id": "j", "reopen_ok": True, "srs": 0.95, "crs": 0.9}
+    base_ver: dict[str, Any] = {
+        "job_id": "j",
+        "checks_run": ALL_CHECKS,
+        "reopen_ok": True,
+        "srs": 0.95,
+        "crs": 0.9,
+    }
     verification = None if ver is None else VerificationReport(**{**base_ver, **ver})
     return GateInput(**{"job_id": "j", "verification": verification, **top})
 
@@ -37,6 +49,27 @@ SINGLE: dict[str, tuple[Case, str, JobState, str]] = {
     "g0_vault": (({"vault_available": False}, {}), "G0", JobState.FAILED, "VAULT_UNAVAILABLE"),
     "g0_no_verification": (({}, None), "G0", JobState.FAILED, "VERIFICATION_MISSING"),
     "g0_reopen": (({}, {"reopen_ok": False}), "G0", JobState.FAILED, "V1_REOPEN_FAILED"),
+    "g0_v1_not_run": (
+        ({}, {"checks_run": ALL_CHECKS - {"V1"}}),
+        "G0",
+        JobState.FAILED,
+        "V1_NOT_RUN",
+    ),
+    **{
+        f"g3_{c.lower()}_not_run": (
+            ({}, {"checks_run": ALL_CHECKS - {c}}),
+            "G3",
+            JobState.BLOCKED,
+            f"{c}_NOT_RUN",
+        )
+        for c in ("V2", "V3", "V4", "V5")
+    },
+    "g6_v6_not_run": (
+        ({}, {"checks_run": ALL_CHECKS - {"V6"}}),
+        "G6",
+        JobState.REVIEW_REQUIRED,
+        "V6_SRS_NOT_MEASURED",
+    ),
     "g1_leak": (({}, {"leak_hits": 2}), "G1", JobState.BLOCKED, "V2_LEAK_HITS=2"),
     "g2_residual": (
         ({}, {"residual_deterministic": 1}),
@@ -176,3 +209,18 @@ def test_rules_are_pure() -> None:
     gi = build(*SINGLE["g4_unapplied"][0])
     assert evaluate(gi) == evaluate(gi)
     assert gi.actions[1].applied is False
+
+
+def test_report_defaults_to_no_checks_run() -> None:
+    # Fail closed: a verifier that does not declare its checks cannot produce SAFE.
+    gi = GateInput(job_id="j", verification=VerificationReport(job_id="j", reopen_ok=True, srs=1.0))
+    assert evaluate(gi).rule == "G0"
+    assert evaluate(gi).reasons == ("V1_NOT_RUN",)
+
+
+def test_partial_verifier_blocks_via_g3() -> None:
+    # The Phase 2/3 stub verifier runs only V1 and V4.
+    ver = VerificationReport(job_id="j", checks_run=frozenset({"V1", "V4"}), reopen_ok=True)
+    verdict = evaluate(GateInput(job_id="j", verification=ver))
+    assert (verdict.rule, verdict.state) == ("G3", JobState.BLOCKED)
+    assert verdict.reasons == ("V2_NOT_RUN", "V3_NOT_RUN", "V5_NOT_RUN")

@@ -123,3 +123,17 @@ context, decision, alternatives and consequences.
 - **Consequences:** No code path outside `decide` can produce a SAFE job. A mutation test
   that removes the public refusal is caught by the `_apply` handle requirement (defence in
   depth), so SAFE stays unreachable either way.
+
+### ADR-24: A verification check that did not run counts as failed
+- **Context:** Until Phase 7 the verifier is a stub that runs only V1 (reopen) and V4
+  (coverage). Once Phase 3 makes extraction real, every part is inspected; a stub that
+  reports `leak_hits=0` because no leak check ran would let a document full of PII reach
+  `VALIDATED_SAFE`.
+- **Decision:** `VerificationReport.checks_run` lists the checks that executed; it defaults
+  to empty. A missing V1 is G0 (`V1_NOT_RUN`); a missing V2..V5 is G3 (`Vn_NOT_RUN`, an
+  uninspected verification dimension, so the job is BLOCKED); a missing V6 is G6.
+- **Alternatives:** make missing checks G0 (would make every stub run FAILED instead of the
+  brief's expected BLOCKED-by-G3, and hide the real coverage reason); trust defaults (fails
+  open).
+- **Consequences:** Partial verifiers are safe to ship. Table and property tests cover each
+  missing check.

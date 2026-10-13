@@ -10,7 +10,7 @@ from pathlib import Path
 from pydantic import SecretStr
 
 from cleargate.core.db import MetaStore
-from cleargate.core.models import VerificationReport
+from cleargate.core.models import ALL_CHECKS, VerificationReport
 from cleargate.core.states import JobState
 from cleargate.gate.machine import transition
 from cleargate.gate.rules import GateInput
@@ -45,7 +45,9 @@ def processing_job(store: MetaStore, job_id: str = "job-1") -> str:
 
 
 def clean_report(job_id: str = "job-1") -> VerificationReport:
-    return VerificationReport(job_id=job_id, reopen_ok=True, srs=0.97, crs=0.95)
+    return VerificationReport(
+        job_id=job_id, checks_run=ALL_CHECKS, reopen_ok=True, srs=0.97, crs=0.95
+    )
 
 
 def clean_input(job_id: str = "job-1") -> GateInput:

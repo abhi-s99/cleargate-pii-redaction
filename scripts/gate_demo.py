@@ -25,7 +25,7 @@ from pydantic import SecretStr
 
 from cleargate.core.db import MetaStore
 from cleargate.core.errors import ClearGateError
-from cleargate.core.models import Coverage, Locator, VerificationReport
+from cleargate.core.models import ALL_CHECKS, Coverage, Locator, VerificationReport
 from cleargate.core.states import JobState
 from cleargate.gate.handle import SafeHandle, verify_against_store
 from cleargate.gate.machine import decide, transition
@@ -60,7 +60,7 @@ def main(argv: list[str] | None = None) -> int:
     sanitized = work / "sanitized.txt"
     sanitized.write_text("[PERSON_1] approved the vendor review.\n", encoding="utf-8")
     store.create_batch("demo-batch", "cadence-default", "a" * 64)
-    clean = VerificationReport(job_id="", reopen_ok=True, srs=0.97, crs=0.95)
+    clean = VerificationReport(job_id="", checks_run=ALL_CHECKS, reopen_ok=True, srs=0.97, crs=0.95)
 
     def job(job_id: str) -> str:
         store.create_job(job_id, "demo-batch", "original.docx", "a" * 64)

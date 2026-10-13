@@ -11,6 +11,9 @@ Interpretations recorded in ADR-21:
   under ``mask_only``;
 * an uninspected part is acceptable only if its locator is in ``masked_parts``;
 * SRS that was not measured is a G6 review item, not a pass.
+
+ADR-24: a check missing from ``VerificationReport.checks_run`` counts as failed (V1 in
+G0, V2..V5 in G3, V6 in G6), so a partial verifier can never produce SAFE.
 """
 
 from __future__ import annotations
@@ -67,6 +70,8 @@ def g0_failed(i: GateInput) -> list[str]:
         out.append(ErrorCode.VAULT_UNAVAILABLE.value)
     if i.verification is None:
         out.append("VERIFICATION_MISSING")
+    elif "V1" not in i.verification.checks_run:
+        out.append("V1_NOT_RUN")
     elif not i.verification.reopen_ok:
         out.append("V1_REOPEN_FAILED")
     return out
@@ -96,6 +101,9 @@ def g3_coverage(i: GateInput) -> list[str]:
         out.append("V4_UNIT_COUNTS_DIFFER")
     if i.masked_regions and i.unreadable_policy == "block":
         out.append(f"MASKED_REGIONS_POLICY_BLOCK={i.masked_regions}")
+    if v is not None:
+        # A verification check that did not run is an uninspected dimension (ADR-24).
+        out.extend(f"{c}_NOT_RUN" for c in ("V2", "V3", "V4", "V5") if c not in v.checks_run)
     return out
 
 
@@ -118,7 +126,7 @@ def g6_review(i: GateInput) -> list[str]:
     v = i.verification
     if v and v.residual_other:
         out.append(f"V3_RESIDUAL_OTHER={v.residual_other}")
-    if v and v.srs is None:
+    if v and ("V6" not in v.checks_run or v.srs is None):
         out.append("V6_SRS_NOT_MEASURED")
     elif v and v.srs is not None and v.srs < i.srs_min:
         out.append("V6_SRS_BELOW_MIN")
