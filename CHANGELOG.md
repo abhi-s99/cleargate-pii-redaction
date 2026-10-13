@@ -6,6 +6,18 @@ phase tags (`v0.NN.0`).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-14: Phase 4, deterministic detection
+
+### Added
+- L1 recognizers with validators: email, phone (`phonenumbers`), SSN (Presidio rules, 9xx
+  allowed), PAN with holder type (business PANs discarded), PESEL (checksum, masked form),
+  payment card (Luhn, IIN), passport (context), policy employee IDs (TR-DT-10).
+- L2 label-anchored capture inline, by column header and by row label, with OCR-confusion
+  repair on OCR segments (TR-DT-11, TR-DT-12); partial financial, SSN last four and home
+  address captures (TR-DT-14 subset, ADR-28).
+- `detect/merge.py`: overlap resolution, evidence retention, tiers and decisions (TRD 6.3),
+  with hypothesis properties.
+
 ## [0.3.0] - 2026-10-14: Phase 3, extraction and synthetic fixtures
 
 ### Added

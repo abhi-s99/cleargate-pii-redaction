@@ -12,7 +12,7 @@ Status values:
 - **XFAIL**: a known limitation, kept as a strict `xfail` test with a reason.
 - **TODO**: not implemented yet (target phase shown).
 
-Last updated: Phase 3 (14 Oct 2026).
+Last updated: Phase 4 (14 Oct 2026).
 
 | ID | Requirement | Phase | Tests | Status |
 |---|---|---|---|---|
@@ -20,9 +20,9 @@ Last updated: Phase 3 (14 Oct 2026).
 | FR-02 | Batch workflow, background progress | 8 | - | TODO |
 | FR-03 | Structure-aware extraction (extraction done; report listing OCR pages in Phase 8) | 3, 8 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator`<br>`tests/integration/test_extract_samples.py::test_docx_structure_matches_profile` | PARTIAL |
 | FR-04 | Source traceability (locators on every segment; report and review in Phase 8) | 3, 8 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator` | PARTIAL |
-| FR-05 | Layered detection | 4 | - | TODO |
+| FR-05 | Layered detection (L1, L2, L4 subset done; NER and registry in Phase 5) | 4, 5 | `tests/unit/test_recognizers.py::test_label_anchored_positives`<br>`tests/unit/test_recognizers.py::test_ssn_positives` | PARTIAL |
 | FR-06 | People vs business entities | 5 | - | TODO |
-| FR-07 | Evidence tiers, calibrated routing | 5 | - | TODO |
+| FR-07 | Evidence tiers, threshold-driven routing (calibration is Phase 10, ADR-28) | 4, 10 | `tests/unit/test_merge.py::test_threshold_changes_routing`<br>`tests/unit/test_merge.py::test_tiers` | PARTIAL |
 | FR-08 | Typed tokens, batch-consistent pseudonyms | 6 | - | TODO |
 | FR-09 | Secure redacted files, no overlays | 6 | - | TODO |
 | FR-10 | Independent verification | 7 | - | TODO |
@@ -45,11 +45,11 @@ Last updated: Phase 3 (14 Oct 2026).
 | G7 | All pass -> VALIDATED_SAFE (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_safe_only_when_nothing_fires`<br>`tests/unit/test_gate_properties.py::test_safe_iff_no_rule_fires` | PASS |
 | TR-DT-01 | Pre-split sub-spans before NER | 5 | - | TODO |
 | TR-DT-02 | OCR text normalisation with offset map | 5 | - | TODO |
-| TR-DT-10 | L1 deterministic recognizers + validators | 4 | - | TODO |
-| TR-DT-11 | L2 label-anchored capture, column headers | 4 | - | TODO |
-| TR-DT-12 | L2 OCR-confusion tolerance | 4 | - | TODO |
+| TR-DT-10 | L1 deterministic recognizers + validators (5+ positives, 5+ negatives, OCR-damaged cases each) | 4 | `tests/unit/test_recognizers.py::test_ssn_positives`<br>`tests/unit/test_recognizers.py::test_ssn_negatives`<br>`tests/unit/test_recognizers.py::test_business_pan_is_discarded_with_reason`<br>`tests/unit/test_recognizers.py::test_pesel_checksum_positives`<br>`tests/unit/test_recognizers.py::test_card_positives`<br>`tests/unit/test_recognizers.py::test_phone_negatives` | PASS |
+| TR-DT-11 | L2 label-anchored capture, column headers and row labels | 4 | `tests/unit/test_recognizers.py::test_label_anchored_positives`<br>`tests/unit/test_recognizers.py::test_label_anchored_negatives`<br>`tests/unit/test_recognizers.py::test_column_header_applies_to_every_cell`<br>`tests/unit/test_recognizers.py::test_row_label_applies_to_value_cell` | PASS |
+| TR-DT-12 | L2 OCR-confusion tolerance (OCR segments only, at most 2 substitutions) | 4 | `tests/unit/test_recognizers.py::test_ocr_confusion_repairs_value_on_ocr_segments`<br>`tests/unit/test_recognizers.py::test_ocr_confusion_not_applied_to_native_text`<br>`tests/unit/test_recognizers.py::test_ocr_confusion_limited_to_two_substitutions` | PASS |
 | TR-DT-13 | L3 Presidio + spaCy NER | 5 | - | TODO |
-| TR-DT-14 | L4 context rules | 4-5 | - | TODO |
+| TR-DT-14 | L4 context rules (partial financial, SSN last-4, home address done; person context in Phase 5) | 4, 5 | `tests/unit/test_recognizers.py::test_partial_financial_positives`<br>`tests/unit/test_recognizers.py::test_ssn_last_four`<br>`tests/unit/test_recognizers.py::test_home_address_with_trigger`<br>`tests/unit/test_recognizers.py::test_corporate_addresses_are_kept` | PARTIAL |
 | TR-DT-15 | L5 registry and propagation | 5 | - | TODO |
 | TR-DT-16 | Region findings (faces, unreadable) | 5 | - | TODO |
 | TR-DT-30 | Calibration (k-fold) | 10 | - | TODO |

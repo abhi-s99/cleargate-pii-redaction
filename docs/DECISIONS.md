@@ -212,3 +212,50 @@ context, decision, alternatives and consequences.
   (Fig. 8, two regions) and five more small candidates (pp. 12, 14, 15, 19, 20) whose truth is
   unknown until gold labels exist; p.32 is no longer flagged. Region rules for embedded images
   are weaker than for pages (block rule plus the whole-image rule above).
+
+### ADR-28: Detection details the TRD leaves open, and where it was tightened
+- **Context:** Building TRD 6 on the synthetic fixtures and running it (counts only) on the
+  real samples exposed gaps: Presidio's constant 0.85 score cannot separate weak from strong
+  NER guesses before calibration exists (Phase 10); a value detected once was left in clear
+  wherever detection missed it (V2 then blocked every sample); OCR reads names as
+  `First M. Last` and splits values over lines; the model tags incident IDs as PERSON and
+  tags only part of some names in `/`-separated cells.
+- **Decision:**
+  1. *Pre-calibration scores* for non-deterministic PERSON candidates, by shape: two or more
+     capitalised tokens not all common words 0.60, all common words 0.45 (NER) or 0.35
+     (label only), one token 0.45 or 0.25 if common, lowercase words or acronyms 0.20-0.30.
+     With `review_threshold` 0.40 this separates `SINGLE_SIGNAL` (review) from `LOW`
+     (discarded, counted). Phase 10 calibrates; these values are documented, not tuned.
+  2. *Trigger-anchored grammars are L2*: `card/account ending NNNN`, `last four digits ...
+     (NNNN)`, SSN last four and `home address`/`home at` + street grammar emit L2 evidence
+     (Architecture ADR-04 lists `home address` as an L2 label), so they are DETERMINISTIC.
+  3. *Person metadata fields are labels*: `dc:creator`, `cp:lastModifiedBy`, PDF `author`,
+     annotation authors, author attributes and EXIF `Artist` are PERSON by field semantics
+     (L2, DETERMINISTIC).
+  4. *Registry*: an exact full-name match (first name, up to two middle initials, surname)
+     of a registered person is CORROBORATED on its own: the person was already confirmed by
+     two signals. Abbreviated variants (`F. Last`, `Dr Last`) and fuzzy OCR matches stay
+     single signals. Fuzzy matching only considers windows that start with a capital.
+     `person_key` is an HMAC of the canonical name (no name in `meta.db`).
+  5. *More L4 grammar*: `First M. Last` (any line) and *list siblings*: in a delimiter list
+     where NER tagged at least one item as a person, a name-shaped item NER missed or
+     tagged only in part gets L4 evidence. Row labels apply in key/value tables.
+  6. *Value propagation (L5)*: after tiering, every redacted value (4+ characters, numbers
+     6+ digits) and every redacted email's local part becomes a linked finding wherever it
+     occurs in the batch: case-sensitive for one-word values, case-insensitive otherwise,
+     digits-only for long numbers in any formatting, and across two consecutive OCR lines
+     of the same raster. Copies inherit type, tier, decision and person. This makes the
+     writer, the sanitized text and V2 agree.
+  7. *Covered weak signals are dropped*: a `SINGLE_SIGNAL`/`LOW` candidate inside a
+     DETERMINISTIC `HOME_ADDRESS`, or on an OCR line inside a masked region, adds nothing.
+  8. *Filters*: NER PERSON spans containing digits are dropped (incident IDs); trailing
+     possessives are trimmed. The "50k common English words" list is the 50 000 most
+     frequent lowercase entries of `en_core_web_lg`'s vector table (frequency-ordered).
+  9. `Finding.locator` added so region findings and reports carry a location (FR-04).
+- **Alternatives:** keep NER-only names at one score (every NER hit to review, about 200
+  review items on the PDF); leave repeated values to V2 (all three samples `BLOCKED`).
+- **Consequences:** On the samples, PDF review items fell from 205 to 91 before grouping,
+  and the sanitized text no longer contains values redacted elsewhere. Propagation can
+  over-redact a value that also has a harmless use; review items are grouped by value so
+  one reviewer decision covers all copies (Phase 8). Scores remain uncalibrated until
+  Phase 10.
