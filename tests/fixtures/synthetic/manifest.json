@@ -1,0 +1,864 @@
+{
+ "seed": 20261013,
+ "generator": "tests/fixtures/make_fixtures.py",
+ "items": [
+  {
+   "id": "planted_docx-01",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Benedikt Saarinen",
+   "channel": "metadata",
+   "expect": {
+    "part": "docProps/core.xml",
+    "key": "dc:creator",
+    "kind": "metadata"
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_docx-02",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Halima Oduya",
+   "channel": "metadata",
+   "expect": {
+    "part": "docProps/core.xml",
+    "key": "cp:lastModifiedBy",
+    "kind": "metadata"
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_docx-03",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Lucinda Farrow",
+   "channel": "native",
+   "expect": {
+    "kind": "header",
+    "part_prefix": "word/header"
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_docx-04",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Priya Halvorsen",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph",
+    "part": "word/document.xml"
+   },
+   "note": "narrative"
+  },
+  {
+   "id": "planted_docx-05",
+   "file": "planted.docx",
+   "type": "US_SSN",
+   "value": "900-12-3456",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph"
+   },
+   "note": "900 area"
+  },
+  {
+   "id": "planted_docx-06",
+   "file": "planted.docx",
+   "type": "PASSPORT",
+   "value": "X1234567",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph"
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_docx-07",
+   "file": "planted.docx",
+   "type": "IN_PAN",
+   "value": "ABCPE1234F",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph"
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_docx-08",
+   "file": "planted.docx",
+   "type": "DATE_OF_BIRTH",
+   "value": "14/02/1987",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph"
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_docx-09",
+   "file": "planted.docx",
+   "type": "HOME_ADDRESS",
+   "value": "42 Larkspur Lane, Springfield, IL 62704",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph"
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_docx-10",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Tobiah Wrenfield",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph"
+   },
+   "note": "Led by"
+  },
+  {
+   "id": "planted_docx-11",
+   "file": "planted.docx",
+   "type": "FINANCIAL_PARTIAL",
+   "value": "4417",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph"
+   },
+   "note": "ending NNNN"
+  },
+  {
+   "id": "planted_docx-12",
+   "file": "planted.docx",
+   "type": "PL_PESEL",
+   "value": "870214xxxxx",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph"
+   },
+   "note": "masked PESEL"
+  },
+  {
+   "id": "planted_docx-13",
+   "file": "planted.docx",
+   "type": "EMAIL_ADDRESS",
+   "value": "j.arakawa@northwind.example",
+   "channel": "native",
+   "expect": {
+    "kind": "list_item"
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_docx-14",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Ottoline Brandt",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "table": 0,
+    "row": 1,
+    "col": 1
+   },
+   "note": "slash-separated cell"
+  },
+  {
+   "id": "planted_docx-15",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Cyrus Mbeki",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "table": 0,
+    "row": 1,
+    "col": 1
+   },
+   "note": "slash-separated cell"
+  },
+  {
+   "id": "planted_docx-16",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Jun Arakawa",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "table": 0,
+    "row": 1,
+    "col": 1
+   },
+   "note": "slash-separated cell"
+  },
+  {
+   "id": "planted_docx-17",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Grace Hunter",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "table": 0,
+    "row": 1,
+    "col": 2
+   },
+   "note": "two common words, Created by"
+  },
+  {
+   "id": "planted_docx-18",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Delacroix-Navarro",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "table": 1,
+    "row": 1,
+    "col": 0,
+    "once": true
+   },
+   "note": "honorific + hyphenated surname, gridSpan"
+  },
+  {
+   "id": "planted_docx-19",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Ilse Marchbank",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "table": 1,
+    "row": 1,
+    "col": 2,
+    "once": true
+   },
+   "note": "vMerge"
+  },
+  {
+   "id": "planted_docx-20",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Imelda Strand",
+   "channel": "native",
+   "expect": {
+    "kind": "textbox",
+    "once": true
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_docx-21",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Quentin Halloway",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph"
+   },
+   "note": "w:delText"
+  },
+  {
+   "id": "planted_docx-22",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Rainer Vosk",
+   "channel": "metadata",
+   "expect": {
+    "kind": "metadata",
+    "part": "word/document.xml"
+   },
+   "note": "w:del/@w:author"
+  },
+  {
+   "id": "planted_docx-23",
+   "file": "planted.docx",
+   "type": "EMAIL_ADDRESS",
+   "value": "q.halloway@vendor.example",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph"
+   },
+   "note": "w:instrText field code"
+  },
+  {
+   "id": "planted_docx-24",
+   "file": "planted.docx",
+   "type": "EMAIL_ADDRESS",
+   "value": "audit.lead@halloran.example",
+   "channel": "metadata",
+   "expect": {
+    "kind": "metadata",
+    "part": "word/_rels/document.xml.rels"
+   },
+   "note": "external relationship target"
+  },
+  {
+   "id": "planted_docx-25",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Marcus Oyelaran",
+   "channel": "ocr",
+   "expect": {
+    "kind": "ocr_line",
+    "part_prefix": "word/media/"
+   },
+   "note": "image-only"
+  },
+  {
+   "id": "planted_docx-26",
+   "file": "planted.docx",
+   "type": "EMAIL_ADDRESS",
+   "value": "m.oyelaran@cadence.example",
+   "channel": "ocr",
+   "expect": {
+    "kind": "ocr_line",
+    "part_prefix": "word/media/"
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_docx-27",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Marcus Oyelaran",
+   "channel": "native",
+   "expect": {
+    "kind": "alt_text"
+   },
+   "note": "alt text"
+  },
+  {
+   "id": "planted_docx-28",
+   "file": "planted.docx",
+   "type": "PERSON",
+   "value": "Wendeline Achterberg",
+   "channel": "metadata",
+   "expect": {
+    "kind": "metadata",
+    "part": "word/comments.xml"
+   },
+   "note": "comment author attribute"
+  },
+  {
+   "id": "planted_pptx-01",
+   "file": "planted.pptx",
+   "type": "PERSON",
+   "value": "Ferdinand Klausen",
+   "channel": "metadata",
+   "expect": {
+    "kind": "metadata",
+    "part": "docProps/core.xml",
+    "key": "dc:creator"
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_pptx-02",
+   "file": "planted.pptx",
+   "type": "PERSON",
+   "value": "Anika Szabo",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "slide": 1,
+    "table": 0,
+    "row": 1,
+    "col": 0
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_pptx-03",
+   "file": "planted.pptx",
+   "type": "EMAIL_ADDRESS",
+   "value": "a.szabo@cadence.example",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "slide": 1,
+    "table": 0,
+    "row": 1,
+    "col": 2
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_pptx-04",
+   "file": "planted.pptx",
+   "type": "PHONE_NUMBER",
+   "value": "+1 (555) 0142",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "slide": 1,
+    "table": 0,
+    "row": 1,
+    "col": 3
+   },
+   "note": "non-standard format, Mobile header"
+  },
+  {
+   "id": "planted_pptx-05",
+   "file": "planted.pptx",
+   "type": "PERSON",
+   "value": "Mateo Lindahl",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "slide": 1,
+    "table": 0,
+    "row": 2,
+    "col": 0
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_pptx-06",
+   "file": "planted.pptx",
+   "type": "EMAIL_ADDRESS",
+   "value": "m.lindahl@cadence.example",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "slide": 1,
+    "table": 0,
+    "row": 2,
+    "col": 2
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_pptx-07",
+   "file": "planted.pptx",
+   "type": "PHONE_NUMBER",
+   "value": "+1 (555) 0157",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "slide": 1,
+    "table": 0,
+    "row": 2,
+    "col": 3
+   },
+   "note": "non-standard format, Mobile header"
+  },
+  {
+   "id": "planted_pptx-08",
+   "file": "planted.pptx",
+   "type": "PERSON",
+   "value": "Yusra Chaudry",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "slide": 1,
+    "table": 0,
+    "row": 3,
+    "col": 0
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_pptx-09",
+   "file": "planted.pptx",
+   "type": "EMAIL_ADDRESS",
+   "value": "y.chaudry@cadence.example",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "slide": 1,
+    "table": 0,
+    "row": 3,
+    "col": 2
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_pptx-10",
+   "file": "planted.pptx",
+   "type": "PHONE_NUMBER",
+   "value": "+48 6015550 193",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "slide": 1,
+    "table": 0,
+    "row": 3,
+    "col": 3
+   },
+   "note": "non-standard format, Mobile header"
+  },
+  {
+   "id": "planted_pptx-11",
+   "file": "planted.pptx",
+   "type": "PERSON",
+   "value": "A. Szabo",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "slide": 2,
+    "table": 1,
+    "row": 0,
+    "col": 1
+   },
+   "note": "M. Surname header"
+  },
+  {
+   "id": "planted_pptx-12",
+   "file": "planted.pptx",
+   "type": "PERSON",
+   "value": "M. Lindahl",
+   "channel": "native",
+   "expect": {
+    "kind": "table_cell",
+    "slide": 2,
+    "table": 1,
+    "row": 0,
+    "col": 2
+   },
+   "note": "M. Surname header"
+  },
+  {
+   "id": "planted_pptx-13",
+   "file": "planted.pptx",
+   "type": "PERSON",
+   "value": "Anselm Kittredge",
+   "channel": "native",
+   "expect": {
+    "kind": "shape_text",
+    "slide": 3
+   },
+   "note": "inside group shape"
+  },
+  {
+   "id": "planted_pptx-14",
+   "file": "planted.pptx",
+   "type": "PERSON",
+   "value": "Wilma Castellanos",
+   "channel": "native",
+   "expect": {
+    "kind": "notes",
+    "slide": 3
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_pptx-15",
+   "file": "planted.pptx",
+   "type": "PERSON",
+   "value": "Ines Valderrama",
+   "channel": "ocr",
+   "expect": {
+    "kind": "ocr_line",
+    "slide": 3
+   },
+   "note": "text only in picture"
+  },
+  {
+   "id": "planted_pptx-16",
+   "file": "planted.pptx",
+   "type": "PERSON",
+   "value": "Ines Valderrama",
+   "channel": "native",
+   "expect": {
+    "kind": "alt_text",
+    "slide": 3
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_native_pdf-01",
+   "file": "planted_native.pdf",
+   "type": "PERSON",
+   "value": "Severine Lund",
+   "channel": "metadata",
+   "expect": {
+    "kind": "metadata",
+    "part": "pdf:info",
+    "key": "author"
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_native_pdf-02",
+   "file": "planted_native.pdf",
+   "type": "PERSON",
+   "value": "Corvin Ashdown",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph",
+    "page": 1
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_native_pdf-03",
+   "file": "planted_native.pdf",
+   "type": "EMPLOYEE_ID",
+   "value": "EMP-48213",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph",
+    "page": 1
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_native_pdf-04",
+   "file": "planted_native.pdf",
+   "type": "EMAIL_ADDRESS",
+   "value": "c.ashdown@cadence.example",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph",
+    "page": 1
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_native_pdf-05",
+   "file": "planted_native.pdf",
+   "type": "PHONE_NUMBER",
+   "value": "+44 20 7946 0123",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph",
+    "page": 1
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_native_pdf-06",
+   "file": "planted_native.pdf",
+   "type": "EMAIL_ADDRESS",
+   "value": "badge.office@cadence.example",
+   "channel": "native",
+   "expect": {
+    "kind": "paragraph",
+    "page": 1,
+    "part": "page-links"
+   },
+   "note": "link URI"
+  },
+  {
+   "id": "planted_native_pdf-07",
+   "file": "planted_native.pdf",
+   "type": "PERSON",
+   "value": "Ulrich Benn",
+   "channel": "metadata",
+   "expect": {
+    "kind": "metadata",
+    "page": 1,
+    "part": "page-annots"
+   },
+   "note": "annotation author"
+  },
+  {
+   "id": "planted_native_pdf-08",
+   "file": "planted_native.pdf",
+   "type": "PERSON",
+   "value": "Nadia Petrossian",
+   "channel": "ocr",
+   "expect": {
+    "kind": "ocr_line",
+    "page": 2,
+    "part": "page-image"
+   },
+   "note": "embedded image on a native page"
+  },
+  {
+   "id": "planted_scanned_pdf-01",
+   "file": "planted_scanned.pdf",
+   "type": "PERSON",
+   "value": "Oriel Vantongeren",
+   "channel": "metadata",
+   "expect": {
+    "kind": "metadata",
+    "part": "pdf:info",
+    "key": "author"
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_scanned_pdf-02",
+   "file": "planted_scanned.pdf",
+   "type": "PERSON",
+   "value": "Fenella Marchetti",
+   "channel": "ocr",
+   "expect": {
+    "kind": "ocr_line",
+    "page": 1
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_scanned_pdf-03",
+   "file": "planted_scanned.pdf",
+   "type": "US_SSN",
+   "value": "900-55-1212",
+   "channel": "ocr",
+   "expect": {
+    "kind": "ocr_line",
+    "page": 1
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_scanned_pdf-04",
+   "file": "planted_scanned.pdf",
+   "type": "DATE_OF_BIRTH",
+   "value": "03/07/1979",
+   "channel": "ocr",
+   "expect": {
+    "kind": "ocr_line",
+    "page": 1
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_scanned-region",
+   "file": "planted_scanned.pdf",
+   "type": "UNREADABLE_IMAGE_REGION",
+   "value": "Quill Amberley",
+   "channel": "image-only",
+   "expect": {
+    "page": 1
+   },
+   "note": "inside the illegible region; must be masked, not read"
+  },
+  {
+   "id": "planted_scanned_pdf-06",
+   "file": "planted_scanned.pdf",
+   "type": "IN_PAN",
+   "value": "BCDPF5678K",
+   "channel": "ocr",
+   "expect": {
+    "kind": "ocr_line",
+    "page": 2
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_scanned_pdf-07",
+   "file": "planted_scanned.pdf",
+   "type": "PL_PESEL",
+   "value": "87021412319",
+   "channel": "ocr",
+   "expect": {
+    "kind": "ocr_line",
+    "page": 2
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_scanned_pdf-08",
+   "file": "planted_scanned.pdf",
+   "type": "PAYMENT_CARD",
+   "value": "4539578123467893",
+   "channel": "ocr",
+   "expect": {
+    "kind": "ocr_line",
+    "page": 2
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_scanned_pdf-09",
+   "file": "planted_scanned.pdf",
+   "type": "PERSON",
+   "value": "Kasimir Ostrowski",
+   "channel": "ocr",
+   "expect": {
+    "kind": "ocr_line",
+    "page": 2
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_png-01",
+   "file": "planted.png",
+   "type": "PERSON",
+   "value": "Oskar Brightwater",
+   "channel": "ocr",
+   "expect": {
+    "kind": "ocr_line",
+    "part": "image"
+   },
+   "note": ""
+  },
+  {
+   "id": "planted_png-02",
+   "file": "planted.png",
+   "type": "PERSON",
+   "value": "Thea Morrow",
+   "channel": "metadata",
+   "expect": {
+    "kind": "metadata",
+    "part": "image:exif",
+    "key": "exif:Artist"
+   },
+   "note": ""
+  }
+ ],
+ "decoys": [
+  {
+   "file": "planted.docx",
+   "value": "RSK-2024-118",
+   "kind": "risk_id"
+  },
+  {
+   "file": "planted.docx",
+   "value": "INC-5531",
+   "kind": "incident_id"
+  },
+  {
+   "file": "planted.docx",
+   "value": "OneTrust",
+   "kind": "product"
+  },
+  {
+   "file": "planted.docx",
+   "value": "Torii",
+   "kind": "product"
+  },
+  {
+   "file": "planted_native.pdf",
+   "value": "GRP-POL-007",
+   "kind": "policy_id"
+  },
+  {
+   "file": "planted_scanned.pdf",
+   "value": "INC-7720",
+   "kind": "incident_id"
+  },
+  {
+   "file": "planted_scanned.pdf",
+   "value": "AAACN1234F",
+   "kind": "company_pan"
+  }
+ ],
+ "regions": [
+  {
+   "file": "planted.docx",
+   "kind": "face",
+   "part_prefix": "word/media/"
+  },
+  {
+   "file": "planted.pptx",
+   "kind": "face",
+   "slide": 3
+  },
+  {
+   "file": "planted_scanned.pdf",
+   "kind": "face",
+   "page": 1
+  },
+  {
+   "file": "planted_scanned.pdf",
+   "kind": "unreadable",
+   "page": 1
+  }
+ ]
+}
