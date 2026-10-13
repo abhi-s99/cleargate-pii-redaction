@@ -1,0 +1,36 @@
+# Confidential case material and anything derived from it. Never commit.
+samples/
+Data/
+eval/gold/
+out/
+data/
+
+# Secrets
+.env
+*.key
+
+# Runtime databases
+*.db
+*.db-wal
+*.db-shm
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+coverage.xml
+htmlcov/
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
