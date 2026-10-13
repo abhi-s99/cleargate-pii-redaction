@@ -5,7 +5,7 @@ ClearGate extracts text from PDFs (including scans), Word and PowerPoint files, 
 
 Built for the **Optiv Consulting case study PS-2: Text Analysis and PII Detection** (client scenario: Cadence Financial Group).
 
-> **Status: Phase 0 (bootstrap) complete.** The package skeleton, policy loading, typed errors, PII-safe logging and the CDM models exist and are tested; no pipeline stage runs yet. The [status table](#status) is the source of truth for what exists, and nothing here should be read as "it works" until that table says *Verified*. The commands under [Quick start](#quick-start-planned) are the target interface. Progress: [docs/PROGRESS.md](docs/PROGRESS.md); test traceability: [docs/VERIFICATION.md](docs/VERIFICATION.md).
+> **Status: Phase 1 (gate core) complete.** The privacy gate (state machine, database guards, rules G0..G7, SafeHandle) and the Phase 0 foundation exist and are tested; no extraction, detection or redaction stage runs yet. The [status table](#status) is the source of truth for what exists, and nothing here should be read as "it works" until that table says *Verified*. The commands under [Quick start](#quick-start-planned) are the target interface. Progress: [docs/PROGRESS.md](docs/PROGRESS.md); test traceability: [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
 [PRD](docs/PRD.md) · [Architecture & technical decisions](docs/Architecture.md) · [TRD](docs/TRD.md)
 
@@ -71,7 +71,8 @@ Sanitized: [PERSON_1] from Finance can be contacted at [EMAIL_1].
 | Token redaction + encrypted vault | Yes | No | No |
 | Format-native writers (scanned PDF, native PDF, DOCX, PPTX, images) | Yes | No | No |
 | Independent verification (V1–V6) | Yes | No | No |
-| Privacy gate state machine + SafeHandle + mock AI handoff | Yes | No | No |
+| Privacy gate state machine + rules G0..G7 + SafeHandle | Yes | Yes | Yes ([Phase 1](docs/phases/PHASE-01-gate.md)) |
+| Mock AI handoff | Yes | No | No |
 | Review queue + Streamlit UI | Yes | No | No |
 | Reports + audit trail | Yes | No | No |
 | Evaluation harness + gold set | Yes | No | No |

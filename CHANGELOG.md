@@ -6,6 +6,21 @@ phase tags (`v0.NN.0`).
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-13: Phase 1, gate core
+
+### Added
+- `core/db.py`: `meta.db` (SQLite, WAL) with batches, jobs, append-only state history,
+  single-use transition tickets, SafeHandles, findings without raw values, review log and
+  reports; triggers reject direct state updates, non-whitelisted edges, SAFE without a
+  handle, history edits and whitelist edits (ADR-20).
+- `gate/machine.py`: TR-GT-01 whitelist, `transition()` (never into SAFE) and `decide()`,
+  the only route to `VALIDATED_SAFE` (ADR-22).
+- `gate/rules.py`: rules G0..G7 as pure functions with ordered evaluation (ADR-21).
+- `gate/handle.py`: SafeHandle mint/verify and the TR-GT-04 store checks.
+- `core/models.py`: `VerificationReport`.
+- `scripts/gate_demo.py` and `make gate-demo` for manual verification.
+- 161 gate tests including a hypothesis state machine over a real database.
+
 ## [0.0.0] - 2026-10-13: Phase 0, bootstrap
 
 ### Added

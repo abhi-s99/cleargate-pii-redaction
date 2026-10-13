@@ -74,3 +74,52 @@ context, decision, alternatives and consequences.
 - **Decision:** Add a `limits` section with the TRD 2 defaults. Use the four TR-DT-10
   patterns. Follow the TRD over the Architecture for the vendor-staff pattern.
 - **Consequences:** Both additions are part of `policy_hash`.
+
+### ADR-20: `core/db.py` and the single-use transition ticket
+- **Context:** TRD 3 has no module for `meta.db`. TR-GT-02 asks for a trigger that raises
+  "unless a `state_history` row with the matching `(job_id, to_state)` was inserted in the
+  same transaction", but SQLite exposes no transaction id, so "same transaction" cannot be
+  tested directly.
+- **Decision:** Add `cleargate/core/db.py` (`MetaStore`, schema, migrations). The gate writes
+  a row into `transition_tickets` that names the job, both states and the new history row.
+  The `AFTER UPDATE OF state` trigger requires that ticket, requires it to point at the
+  newest history row for the job with matching states, and deletes it. Because the ticket
+  is consumed by the update and the gate writes history, ticket and update in one
+  `BEGIN IMMEDIATE` transaction, a history row from an earlier transaction can never
+  authorise a later update. Extra guards in the same schema: `allowed_transitions` (a frozen
+  copy of TR-GT-01 checked by the trigger), jobs only insertable in `RECEIVED`,
+  `VALIDATED_SAFE` needs a `safe_handles` row, immutable `job_id`/`policy_hash`/handles,
+  append-only history (deletable only after its job is gone, for TR-SEC-06).
+- **Alternatives:** a `consumed` flag on history rows (needs updates to an append-only
+  table); a per-connection temp table (connection-scoped, not transaction-scoped).
+- **Consequences:** Raw SQL with full write access can still forge every row; SQLite is not
+  the security boundary. The SafeHandle HMAC is, and a test shows a fully forged SAFE row
+  is refused by `verify_against_store` (`mac_mismatch`).
+
+### ADR-21: How the gate rules read inputs the TRD leaves open
+- **Context:** TRD 8.2 names the rules but not every input combination.
+- **Decision:**
+  - No verification report at all is a **G0** failure (`VERIFICATION_MISSING`): unverified
+    is not safe.
+  - If minting the SafeHandle fails after G7 (sanitized file missing, bad key), the job ends
+    **G0** `FAILED` with `HANDLE_MINT_FAILED`.
+  - Masked unreadable/photo regions: an open review item (**G6**) under `mask_and_review`,
+    an uncovered part (**G3**) under `block`, neither under `mask_only` (Architecture 6).
+  - An uninspected part passes G3 only if its locator is listed in `masked_parts`.
+  - SRS not measured is a **G6** review item (`V6_SRS_NOT_MEASURED`), not a pass. SRS equal
+    to `srs_min` passes (the TRD says "below 0.80" triggers review).
+  - Every rule reports all of its reasons; the first rule with any reason decides.
+- **Consequences:** Each interpretation has a table-driven test in `test_gate_rules.py`.
+
+### ADR-22: Only `decide()` can enter VALIDATED_SAFE
+- **Context:** ADR-09 describes a single `gate.transition(job, to_state, reason)`. A first
+  implementation accepted a caller-supplied `SafeHandle` for the SAFE edge. The Phase 1
+  hypothesis state machine showed that a caller could pass a handle signed with the wrong
+  key, because `transition` has no gate key to check it with.
+- **Decision:** One internal function `_apply` performs every state change. The public
+  `transition` refuses `VALIDATED_SAFE` unconditionally. `decide` evaluates G0..G7 and, on
+  G7, mints the handle itself with the gate key and calls `_apply`. Rule ids and reasons
+  must be identifier-like strings (no spaces), so history cannot hold content.
+- **Consequences:** No code path outside `decide` can produce a SAFE job. A mutation test
+  that removes the public refusal is caught by the `_apply` handle requirement (defence in
+  depth), so SAFE stays unreachable either way.
