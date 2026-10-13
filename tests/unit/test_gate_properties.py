@@ -99,7 +99,6 @@ FAULTS: list[tuple[str, dict[str, Any]]] = [
     ("uninspected", {"coverage": Coverage(uninspected=[Locator(part="unmaskable")])}),
 ]
 VER_FAULTS: list[dict[str, Any]] = [
-    *({"checks_run": ALL_CHECKS - {c}} for c in sorted(ALL_CHECKS)),
     {"reopen_ok": False},
     {"leak_hits": 1},
     {"residual_deterministic": 1},
@@ -113,8 +112,16 @@ VER_FAULTS: list[dict[str, Any]] = [
 
 
 def with_fault(gi: GateInput, data: st.DataObject) -> GateInput:
-    if gi.verification is not None and data.draw(st.booleans()):
-        ver = gi.verification.model_copy(update=data.draw(st.sampled_from(VER_FAULTS)))
+    v = gi.verification
+    if v is not None and data.draw(st.booleans()):
+        if data.draw(st.booleans()):
+            # Fault = one check did not run. Remove it from what ran; never add any.
+            dropped = data.draw(st.sampled_from(sorted(ALL_CHECKS)))
+            ver = v.model_copy(update={"checks_run": v.checks_run - {dropped}})
+            if ver.checks_run == v.checks_run:  # already missing: use another fault
+                ver = v.model_copy(update={"leak_hits": v.leak_hits + 1})
+        else:
+            ver = v.model_copy(update=data.draw(st.sampled_from(VER_FAULTS)))
         return gi.model_copy(update={"verification": ver})
     _, update = data.draw(st.sampled_from(FAULTS))
     return gi.model_copy(update=update)
