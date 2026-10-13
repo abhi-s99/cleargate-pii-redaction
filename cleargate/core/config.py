@@ -19,7 +19,7 @@ import json
 import os
 import re
 import shutil
-from collections.abc import Mapping
+from collections.abc import Mapping, MutableMapping
 from pathlib import Path
 from typing import Any, Literal
 
@@ -218,6 +218,19 @@ def resolve_tesseract(env: Mapping[str, str]) -> str | None:
     if WINDOWS_TESSERACT.is_file():
         return str(WINDOWS_TESSERACT)
     return None
+
+
+def load_env_file(path: Path, env: MutableMapping[str, str] | None = None) -> None:
+    """Minimal ``KEY=VALUE`` reader for a local ``.env``. Existing variables win."""
+    target = os.environ if env is None else env
+    if not path.is_file():
+        return
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        target.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 
 def load_settings(env: Mapping[str, str] | None = None) -> Settings:

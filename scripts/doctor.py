@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import argparse
 import importlib.metadata
-import os
 import re
 import subprocess
 import sys
@@ -23,24 +22,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from cleargate.core.config import (
     check_gate_key,
     check_vault_key,
+    load_env_file,
     load_policy,
     load_settings,
 )
 from cleargate.core.errors import ClearGateError
 
 Check = tuple[str, bool, str]
-
-
-def load_env_file(path: Path) -> None:
-    """Minimal KEY=VALUE reader. Existing environment variables win."""
-    if not path.is_file():
-        return
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 
 def check_python() -> Check:

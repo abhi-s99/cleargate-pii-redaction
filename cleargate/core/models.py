@@ -140,11 +140,28 @@ class Segment(_Model):
     parent_id: str | None = None
 
 
+class PartIssue(_Model):
+    """Why a part was not (fully) inspected (TR-EX-40). ``code`` is an identifier."""
+
+    locator: Locator
+    code: str
+
+
 class Coverage(_Model):
     parts_total: int = 0
     parts_inspected: int = 0
     parts_masked: int = 0
     uninspected: list[Locator] = Field(default_factory=list)
+    issues: list[PartIssue] = Field(default_factory=list)  # one per uninspected part (ADR-23)
+
+    def register(self, locator: Locator, *, inspected: bool, code: str | None = None) -> None:
+        """Count a part. Uninspected parts must carry a code."""
+        self.parts_total += 1
+        if inspected:
+            self.parts_inspected += 1
+            return
+        self.uninspected.append(locator)
+        self.issues.append(PartIssue(locator=locator, code=code or "UNINSPECTED"))
 
 
 class Document(_Model):

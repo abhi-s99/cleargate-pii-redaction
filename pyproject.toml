@@ -49,6 +49,9 @@ dev = [
     "detect-secrets==1.5.0",
 ]
 
+[project.scripts]
+cleargate = "cleargate.cli:main"
+
 [tool.setuptools.packages.find]
 include = ["cleargate*"]
 
@@ -95,3 +98,13 @@ files = ["cleargate"]
 [[tool.mypy.overrides]]
 module = ["cleargate.core.*", "cleargate.gate.*", "cleargate.verify.*"]
 strict = true
+
+# Lenient elsewhere (brief section 4.1): third-party OCR/PDF/Office libraries are untyped.
+[[tool.mypy.overrides]]
+module = [
+    "cleargate.ingest.*", "cleargate.extract.*", "cleargate.detect.*", "cleargate.redact.*",
+    "cleargate.report.*", "cleargate.api.*", "cleargate.ui.*", "cleargate.pipeline",
+    "cleargate.cli",
+]
+disallow_untyped_calls = false
+warn_return_any = false
