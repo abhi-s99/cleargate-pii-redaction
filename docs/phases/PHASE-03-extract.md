@@ -53,6 +53,10 @@ cleargate extract tests/fixtures/synthetic/planted.docx --show-text   # invented
 python tests/fixtures/make_fixtures.py out/fx && git diff --no-index tests/fixtures/synthetic/manifest.json out/fx/manifest.json
 ```
 
+To judge the region candidates by eye (team only; images stay in git-ignored `out/`):
+`python scripts/show_regions.py Data/Cadence_Group_Risk_Management_Policy__v6.0.pdf`
+writes `out/regions/<file>/page-NN.png` with faces in red and unreadable regions in orange.
+
 ## Actual results
 
 **Static checks:** ruff All checks passed; ruff format 118 files already formatted; mypy
