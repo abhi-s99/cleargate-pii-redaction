@@ -12,7 +12,7 @@ else
 endif
 PY := $(VENV_BIN)/python
 
-.PHONY: setup keys doctor lint format test test-all smoke eval run check clean
+.PHONY: setup keys doctor lint format test test-all smoke eval run check clean gate-demo
 
 setup:
 	test -x $(PY) || $(BOOTSTRAP_PY) -m venv .venv
@@ -55,6 +55,9 @@ run:
 check: lint test
 	$(PY) scripts/check_matrix.py
 	$(PY) scripts/check_style.py
+
+gate-demo:
+	$(PY) scripts/gate_demo.py
 
 clean:
 	rm -rf .pytest_cache .mypy_cache .ruff_cache .hypothesis htmlcov .coverage
