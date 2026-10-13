@@ -6,6 +6,20 @@ phase tags (`v0.NN.0`).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-13: Phase 2, walking skeleton
+
+### Added
+- `ingest/validator.py`: content-based type detection, extension agreement, size/page/
+  image/zip-bomb limits, encryption and macro detection, safe XML parsing (TR-IN-01..06).
+- `ingest/storage.py`: owner-only job directories, `O_EXCL` upload storage, sanitised
+  display names (TR-SEC-04, ADR-25).
+- `pipeline.py`: stage protocols, `JobContext`, stub stages, fail-closed orchestration.
+- `cli.py`: `cleargate process | status | extract --dump`.
+- `Coverage.issues` with a code per uninspected part (ADR-23).
+
+### Fixed
+- Gate: a verification check that did not run now counts as failed (ADR-24).
+
 ## [0.1.0] - 2026-10-13: Phase 1, gate core
 
 ### Added

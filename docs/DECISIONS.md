@@ -137,3 +137,28 @@ context, decision, alternatives and consequences.
   open).
 - **Consequences:** Partial verifiers are safe to ship. Table and property tests cover each
   missing check.
+
+### ADR-23: CDM and module additions for coverage codes, storage and CLI
+- **Context:** TR-EX-40 wants an error code for every uninspected part, but TRD 4 defines
+  `Coverage.uninspected` as a plain `list[Locator]`. TRD 3 has no module for upload storage
+  or for the CLI the brief asks for in Phase 2.
+- **Decision:** Keep `Coverage.uninspected` (the gate's input) unchanged and add
+  `Coverage.issues: list[PartIssue(locator, code)]`, filled by `Coverage.register(...)`, one
+  entry per uninspected part. Add `cleargate/ingest/storage.py` (job dirs, uploads) and
+  `cleargate/cli.py` (Typer, `cleargate` console script).
+- **Consequences:** Reports can say *why* a part was not inspected; the gate logic is
+  untouched.
+
+### ADR-25: Owner-only job directories on Windows; display filenames are kept
+- **Context:** TR-SEC-04 asks for `0700` job directories. On Windows `chmod` only toggles the
+  read-only flag. Separately, the uploaded display name is stored in `jobs.filename` and
+  could contain a person's name (Phase 1 open question).
+- **Decision:** On Windows, `secure_dir` removes inherited ACEs and grants full control to
+  the current user only (`icacls /inheritance:r /grant:r`); files created inside inherit
+  that single ACE (checked by a test). On POSIX it sets `0700`. The display name is kept
+  (sanitised: basename only, control characters removed, at most 120 characters) because
+  FR-13 reports must name the file; it is never used as a path (uploads are stored as
+  `original.<ext>`), and it is listed as a known limitation.
+- **Alternatives:** hashing the display name (loses the FR-13 file name).
+- **Consequences:** `RLIMIT_AS` (TR-SEC-07) remains POSIX-only; the Phase 11 Docker image
+  provides it. A filename that is itself PII is a documented residual risk.

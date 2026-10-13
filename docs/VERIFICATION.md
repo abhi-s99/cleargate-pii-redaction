@@ -12,11 +12,11 @@ Status values:
 - **XFAIL**: a known limitation, kept as a strict `xfail` test with a reason.
 - **TODO**: not implemented yet (target phase shown).
 
-Last updated: Phase 1 (13 Oct 2026).
+Last updated: Phase 2 (13 Oct 2026).
 
 | ID | Requirement | Phase | Tests | Status |
 |---|---|---|---|---|
-| FR-01 | Ingestion and validation | 2 | - | TODO |
+| FR-01 | Ingestion and validation | 2 | `tests/integration/test_pipeline.py::test_invalid_input_ends_failed_with_specific_code`<br>`tests/unit/test_validator.py::test_samples_are_accepted` | PASS |
 | FR-02 | Batch workflow, background progress | 8 | - | TODO |
 | FR-03 | Structure-aware extraction, OCR fallback | 3 | - | TODO |
 | FR-04 | Source traceability per finding | 3 | - | TODO |
@@ -35,10 +35,10 @@ Last updated: Phase 1 (13 Oct 2026).
 | FR-17 | YAML policy configuration and hash (load, validate, hash; per-job recording in Phase 1) | 0 | `tests/unit/test_config.py::test_default_policy_loads`<br>`tests/unit/test_config.py::test_policy_hash_stable_across_key_reordering_in_yaml`<br>`tests/unit/test_config.py::test_invalid_policies_are_rejected` | PARTIAL |
 | FR-18 | Standalone images | 3 | - | TODO |
 | FR-19 | XLSX (MAY) | stretch | - | TODO |
-| G0 | Exception, V1 fail, vault unavailable, missing verification, handle mint failure -> FAILED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins`<br>`tests/unit/test_gate_machine.py::test_decide_without_sanitized_file_fails_closed` | PASS |
+| G0 | Exception, V1 fail, vault unavailable, missing verification, handle mint failure -> FAILED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins`<br>`tests/unit/test_gate_machine.py::test_decide_without_sanitized_file_fails_closed`<br>`tests/integration/test_pipeline.py::test_crash_in_any_stage_ends_failed`<br>`tests/integration/test_pipeline.py::test_crash_in_gate_decision_ends_failed` | PASS |
 | G1 | V2 needle found -> BLOCKED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins` | PASS |
 | G2 | V3 new DETERMINISTIC -> BLOCKED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins` | PASS |
-| G3 | V4 uninspected part, unit counts, masked regions under block -> BLOCKED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins` | PASS |
+| G3 | V4 uninspected part, unit counts, masked regions under block -> BLOCKED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins`<br>`tests/integration/test_pipeline.py::test_valid_file_ends_blocked_by_g3`<br>`tests/unit/test_gate_rules.py::test_partial_verifier_blocks_via_g3` | PASS |
 | G4 | Unapplied action -> BLOCKED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins` | PASS |
 | G5 | V5 failed -> BLOCKED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins` | PASS |
 | G6 | Open review item, masked regions, V3 other, SRS low or unmeasured -> REVIEW_REQUIRED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins` | PASS |
@@ -75,12 +75,12 @@ Last updated: Phase 1 (13 Oct 2026).
 | TR-GT-03 | SafeHandle mint/verify, only via decide() (ADR-22) | 1 | `tests/unit/test_gate_handle.py::test_tampering_any_field_is_refused`<br>`tests/unit/test_gate_handle.py::test_sanitized_file_changed_on_disk_is_refused`<br>`tests/unit/test_gate_machine.py::test_decide_clean_input_mints_handle_and_is_safe`<br>`tests/unit/test_gate_machine.py::test_public_transition_can_never_enter_safe` | PASS |
 | TR-GT-04 | Handoff verifies handle and hash (store checks done; AI call in Phase 8) | 1, 8 | `tests/unit/test_gate_handle.py::test_validly_signed_handle_for_non_safe_job_is_refused`<br>`tests/unit/test_gate_handle.py::test_handle_under_a_different_policy_is_refused`<br>`tests/unit/test_gate_handle.py::test_handle_not_issued_by_the_gate_is_refused` | PARTIAL |
 | TR-GT-05 | MockAgent default, LLM needs approval (config rule only; MockAgent in Phase 8) | 0, 8 | `tests/unit/test_config.py::test_invalid_policies_are_rejected`<br>`tests/unit/test_config.py::test_llm_enabled_with_full_approval_is_accepted` | PARTIAL |
-| TR-IN-01 | PDF detection | 2 | - | TODO |
-| TR-IN-02 | DOCX detection | 2 | - | TODO |
-| TR-IN-03 | PPTX detection | 2 | - | TODO |
-| TR-IN-04 | PNG/JPEG/TIFF detection | 2 | - | TODO |
-| TR-IN-05 | XLSX detection (MAY) | stretch | - | TODO |
-| TR-IN-06 | Reject legacy, macro, encrypted | 2 | - | TODO |
+| TR-IN-01 | PDF detection | 2 | `tests/unit/test_validator.py::test_valid_files_are_accepted`<br>`tests/unit/test_validator.py::test_extension_must_match_content`<br>`tests/unit/test_validator.py::test_corrupt_pdf` | PASS |
+| TR-IN-02 | DOCX detection | 2 | `tests/unit/test_validator.py::test_valid_files_are_accepted`<br>`tests/unit/test_validator.py::test_extension_must_match_content` | PASS |
+| TR-IN-03 | PPTX detection | 2 | `tests/unit/test_validator.py::test_valid_files_are_accepted`<br>`tests/unit/test_validator.py::test_extension_must_match_content` | PASS |
+| TR-IN-04 | PNG/JPEG/TIFF detection | 2 | `tests/unit/test_validator.py::test_valid_files_are_accepted`<br>`tests/unit/test_validator.py::test_truncated_png`<br>`tests/unit/test_validator.py::test_image_too_large` | PASS |
+| TR-IN-05 | XLSX (MAY): detected and rejected as unsupported; extraction is stretch | stretch | `tests/unit/test_validator.py::test_xlsx_is_not_supported_yet` | PARTIAL |
+| TR-IN-06 | Reject legacy, macro, encrypted | 2 | `tests/unit/test_validator.py::test_unsupported_extensions`<br>`tests/unit/test_validator.py::test_legacy_ole_file_disguised_as_docx`<br>`tests/unit/test_validator.py::test_encrypted_pdf`<br>`tests/unit/test_validator.py::test_encrypted_ooxml_package`<br>`tests/unit/test_validator.py::test_macro_content_type_behind_docx_extension`<br>`tests/unit/test_validator.py::test_vba_project_part` | PASS |
 | TR-PF-01 | DOCX/PPTX without images <= 15 s | 11 | - | TODO |
 | TR-PF-02 | DOCX with screenshots <= 3 min | 11 | - | TODO |
 | TR-PF-03 | Scanned PDF <= 20 s/page | 11 | - | TODO |
@@ -101,10 +101,10 @@ Last updated: Phase 1 (13 Oct 2026).
 | TR-SEC-01 | No outbound network, socket-blocked tests (suite runs socket-blocked; pipeline run later) | 0, 11 | `tests/security/test_network.py::test_outbound_socket_is_blocked`<br>`tests/security/test_network.py::test_raw_socket_construction_is_blocked` | PARTIAL |
 | TR-SEC-02 | Raw values only in memory and vault (models and errors; models, errors, meta.db findings; logs/reports in Phase 8) | 0, 8 | `tests/unit/test_models.py::test_segment_text_never_serialises`<br>`tests/unit/test_models.py::test_finding_value_never_serialises`<br>`tests/unit/test_models.py::test_property_any_text_is_absent_from_dumps`<br>`tests/unit/test_errors.py::test_content_like_details_are_redacted`<br>`tests/unit/test_db.py::test_findings_are_stored_without_raw_values` | PARTIAL |
 | TR-SEC-03 | PiiSafeFilter and log grep (filter done; sample log grep later) | 0, 8 | `tests/unit/test_logging.py::test_record_with_active_needle_is_dropped`<br>`tests/unit/test_logging.py::test_exception_args_and_traceback_are_stripped` | PARTIAL |
-| TR-SEC-04 | 0700 job dirs, O_EXCL, safe filenames | 2 | - | TODO |
+| TR-SEC-04 | Restricted job dirs (0700 / Windows ACL, ADR-25), O_EXCL, safe filenames | 2 | `tests/unit/test_storage.py::test_job_dir_is_created_once_and_restricted`<br>`tests/unit/test_storage.py::test_upload_is_stored_as_original_with_o_excl`<br>`tests/unit/test_storage.py::test_display_names_are_sanitised`<br>`tests/integration/test_pipeline.py::test_upload_is_stored_under_job_dir_as_original` | PASS |
 | TR-SEC-05 | Server-side state enforcement on artifacts | 8 | - | TODO |
 | TR-SEC-06 | TTL sweeper and batch delete (store-level delete done; sweeper and endpoint in Phase 8) | 1, 8 | `tests/unit/test_db.py::test_delete_batch_removes_jobs_history_and_findings` | PARTIAL |
-| TR-SEC-07 | Parser hardening | 2, 11 | - | TODO |
+| TR-SEC-07 | Parser hardening (DTD/XXE, zip bomb, page and image limits done; OCR timeout Phase 3; RLIMIT_AS Phase 11) | 2, 3, 11 | `tests/unit/test_validator.py::test_xxe_in_content_types_is_rejected`<br>`tests/unit/test_validator.py::test_billion_laughs_is_rejected`<br>`tests/unit/test_validator.py::test_zip_bomb_by_ratio`<br>`tests/unit/test_validator.py::test_too_many_pages` | PARTIAL |
 | TR-SEC-08 | No original XObjects or thumbnails in output | 6 | - | TODO |
 | TR-SEC-09 | Documented prototype limits | 11 | - | TODO |
 | V1 | Output reopens via two parsers | 7 | - | TODO |
