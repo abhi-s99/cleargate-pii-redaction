@@ -137,6 +137,9 @@ class Segment(_Model):
     locator: Locator
     method: Literal["native", "ocr"]
     ocr_word_conf: list[float] | None = None
+    # One box per space-separated word of ``text`` (OCR lines only): geometry, not content.
+    # Raster writers burn exactly these boxes (TR-RD-20, ADR-29).
+    ocr_word_boxes: list[tuple[float, float, float, float]] | None = None
     parent_id: str | None = None
 
 
@@ -215,6 +218,7 @@ class Finding(_Model):
     person_key: str | None = None
     decision: Decision
     token: str | None = None
+    locator: Locator | None = None  # segment or region location (FR-04, ADR-28)
 
 
 class RedactionAction(_Model):

@@ -40,7 +40,7 @@ from typing import Any
 from cleargate.core.models import Finding
 from cleargate.core.states import JobState
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 ALLOWED_TRANSITIONS: frozenset[tuple[JobState, JobState]] = frozenset(
     {
@@ -126,7 +126,8 @@ CREATE TABLE IF NOT EXISTS findings (
     preview        TEXT NOT NULL,
     person_key     TEXT,
     token          TEXT,
-    evidence_json  TEXT NOT NULL
+    evidence_json  TEXT NOT NULL,
+    locator_json   TEXT
 );
 
 CREATE TABLE IF NOT EXISTS review_log (
@@ -137,6 +138,15 @@ CREATE TABLE IF NOT EXISTS review_log (
     action        TEXT NOT NULL,
     justification TEXT,
     created_at    TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS runs (
+    job_id       TEXT PRIMARY KEY REFERENCES jobs(job_id) ON DELETE CASCADE,
+    report_json  TEXT NOT NULL,
+    actions_json TEXT NOT NULL,
+    timings_json TEXT NOT NULL,
+    versions_json TEXT NOT NULL,
+    created_at   TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS reports (
@@ -263,6 +273,9 @@ class MetaStore:
     def _migrate(self) -> None:
         # executescript manages its own transaction; run it outside ours.
         self.conn.executescript(SCHEMA)
+        cols = {r[1] for r in self.conn.execute("PRAGMA table_info(findings)")}
+        if "locator_json" not in cols:  # schema 1 -> 2
+            self.conn.execute("ALTER TABLE findings ADD COLUMN locator_json TEXT")
         with self.transaction():
             if self.conn.execute("SELECT COUNT(*) FROM schema_info").fetchone()[0] == 0:
                 self.conn.execute("INSERT INTO schema_info VALUES (?)", (SCHEMA_VERSION,))
@@ -361,9 +374,59 @@ class MetaStore:
         rows = [_finding_row(job_id, f) for f in findings]
         with self.transaction():
             self.conn.executemany(
-                "INSERT INTO findings VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", rows
+                "INSERT INTO findings VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", rows
             )
         return len(rows)
+
+    def replace_findings(self, job_id: str, findings: Iterable[Finding]) -> int:
+        """Findings of the latest run (a review re-run replaces the previous set)."""
+        rows = [_finding_row(job_id, f) for f in findings]
+        with self.transaction():
+            self.conn.execute("DELETE FROM findings WHERE job_id = ?", (job_id,))
+            self.conn.executemany(
+                "INSERT INTO findings VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", rows
+            )
+        return len(rows)
+
+    def save_run(
+        self,
+        job_id: str,
+        report: Any,
+        actions: Iterable[Any],
+        timings: dict[str, float],
+        versions: dict[str, str],
+    ) -> None:
+        """Verification report, action summary, timings, stage versions: content-free."""
+        acts = [
+            {
+                "finding_ids": a.finding_ids,
+                "method": a.method,
+                "applied": a.applied,
+                "error_code": a.error_code,
+                "part": a.locator.part,
+                "page": a.locator.page,
+                "slide": a.locator.slide,
+            }
+            for a in actions
+        ]
+        with self.transaction():
+            self.conn.execute(
+                "INSERT OR REPLACE INTO runs VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    job_id,
+                    report.model_dump_json(),
+                    json.dumps(acts, sort_keys=True),
+                    json.dumps(timings, sort_keys=True),
+                    json.dumps(versions, sort_keys=True),
+                    self.now(),
+                ),
+            )
+
+    def run(self, job_id: str) -> sqlite3.Row | None:
+        row: sqlite3.Row | None = self.conn.execute(
+            "SELECT * FROM runs WHERE job_id = ?", (job_id,)
+        ).fetchone()
+        return row
 
     def findings(self, job_id: str) -> list[sqlite3.Row]:
         return list(
@@ -392,4 +455,5 @@ def _finding_row(job_id: str, finding: Finding) -> tuple[Any, ...]:
         d["person_key"],
         d["token"],
         json.dumps(d["evidence"], sort_keys=True),
+        json.dumps(d["locator"], sort_keys=True) if d.get("locator") else None,
     )

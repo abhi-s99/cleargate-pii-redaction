@@ -7,57 +7,23 @@ coverage complete; unit counts agree with an independent library (differential).
 
 from __future__ import annotations
 
-import secrets
 from pathlib import Path
 
 import pdfplumber
 import pymupdf
 import pytest
-from cryptography.fernet import Fernet
 from docx import Document as DocxDocument
 from PIL import Image
 from pptx import Presentation
-from pydantic import SecretStr
 from rapidfuzz import fuzz
 
-from cleargate.core.config import Settings, load_policy
+from cleargate.core.config import Settings
 from cleargate.core.models import Document
-from cleargate.ingest.validator import validate
-from cleargate.pipeline import JobContext, default_stages
 from tests.fixtures.manifest import SYNTHETIC, load_manifest, matches, norm, planted_items
+from tests.integration.conftest import extract_file
 
 ITEMS = [i for i in planted_items() if i.type != "UNREADABLE_IMAGE_REGION"]
 FILES = sorted({i.file for i in planted_items()})
-
-
-def extract_file(path: Path, settings: Settings, job_dir: Path) -> Document:
-    policy = load_policy()
-    vf = validate(path, policy.limits)
-    ctx = JobContext("fixture", "none", job_dir, policy, "", settings, None)  # type: ignore[arg-type]
-    return default_stages().extractor_for(vf.fmt).extract(path, vf.fmt, ctx)
-
-
-@pytest.fixture(scope="session")
-def ocr_settings(tmp_path_factory: pytest.TempPathFactory) -> Settings:
-    from cleargate.core.config import load_settings
-
-    base = load_settings({})
-    return Settings(
-        data_dir=tmp_path_factory.mktemp("data"),
-        vault_key=SecretStr(Fernet.generate_key().decode()),
-        gate_key=SecretStr(secrets.token_urlsafe(32)),
-        tesseract_cmd=base.tesseract_cmd,
-        ocr_workers=1,
-    )
-
-
-@pytest.fixture(scope="session")
-def docs(ocr_settings: Settings, tmp_path_factory: pytest.TempPathFactory) -> dict[str, Document]:
-    if not ocr_settings.tesseract_cmd:
-        pytest.skip("Tesseract not installed")
-    return {
-        f: extract_file(SYNTHETIC / f, ocr_settings, tmp_path_factory.mktemp("job")) for f in FILES
-    }
 
 
 @pytest.mark.parametrize("item", ITEMS, ids=[i.id for i in ITEMS])
