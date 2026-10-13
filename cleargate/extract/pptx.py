@@ -31,6 +31,7 @@ from cleargate.extract.base import DocBuilder, analyse_raster
 from cleargate.extract.docx import analyse_media, sweep_remaining
 from cleargate.extract.image import open_image, prepare_for_ocr
 from cleargate.extract.metadata import ooxml_core
+from cleargate.extract.textmap import drawing_body, drawing_paragraph, text_of
 from cleargate.extract.xml import author_attributes, parse_part
 
 P_NS = "http://schemas.openxmlformats.org/presentationml/2006/main"
@@ -85,7 +86,7 @@ class PptxExtractor:
                         )
                 if shape.has_text_frame:
                     for i, para in enumerate(shape.text_frame.paragraphs):
-                        text = "".join(r.text for r in para.runs) or para.text
+                        text = text_of(drawing_paragraph(para._p))
                         b.add("shape_text", text, Locator(**base, paragraph_index=i))
                 if getattr(shape, "has_table", False) and shape.has_table:
                     tables += 1
@@ -95,7 +96,7 @@ class PptxExtractor:
                                 continue
                             b.add(
                                 "table_cell",
-                                cell.text,
+                                text_of(drawing_body(cell._tc)),
                                 Locator(**base, table=tables - 1, row=r, col=c),
                             )
                 if getattr(shape, "has_chart", False) and shape.has_chart:
@@ -143,7 +144,7 @@ class PptxExtractor:
                         for i, para in enumerate(shape.text_frame.paragraphs):
                             b.add(
                                 "notes",
-                                para.text,
+                                text_of(drawing_paragraph(para._p)),
                                 Locator(
                                     part=npart, slide=s, shape_id=shape.shape_id, paragraph_index=i
                                 ),

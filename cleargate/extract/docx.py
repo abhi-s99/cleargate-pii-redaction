@@ -37,6 +37,7 @@ from cleargate.core.models import Document, FileFormat, Locator, SegmentKind
 from cleargate.extract.base import DocBuilder, analyse_raster
 from cleargate.extract.image import open_image, prepare_for_ocr
 from cleargate.extract.metadata import ooxml_core
+from cleargate.extract.textmap import docx_cell, docx_paragraph, text_of
 from cleargate.extract.xml import author_attributes, generic_text, parse_part
 
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
@@ -91,15 +92,8 @@ def nearest(el: etree._Element, tag: str) -> etree._Element | None:
 
 
 def paragraph_text(p: etree._Element) -> str:
-    parts: list[str] = []
-    for el in p.iter():
-        if el is p or not isinstance(el.tag, str):
-            continue
-        if el.tag in TEXT_TAGS or el.tag in BREAK_TAGS:
-            if nearest(el, W_P) is not p or in_fallback(el, p):
-                continue
-            parts.append(el.text or "" if el.tag in TEXT_TAGS else BREAK_TAGS[el.tag])
-    return "".join(parts)
+    # Built from the same pieces the writer edits (textmap), so offsets always agree.
+    return text_of(docx_paragraph(p))
 
 
 def rels(zf: zipfile.ZipFile, part: str) -> dict[str, str]:
@@ -252,12 +246,7 @@ class _Walker:
                     vm = tcpr.find(q(W, "vMerge"))
                     continuation = vm is not None and vm.get(q(W, "val"), "continue") != "restart"
                 if not continuation:
-                    paras = [
-                        p
-                        for p in tc.iter(W_P)
-                        if nearest(p, W_TXBX) is None and not in_fallback(p, tc)
-                    ]
-                    text = "\n".join(paragraph_text(p) for p in paras)
+                    text = text_of(docx_cell(tc))
                     seg_id = self.b.add(
                         kind or "table_cell", text, self.loc(tc, table=t, row=r, col=col)
                     )

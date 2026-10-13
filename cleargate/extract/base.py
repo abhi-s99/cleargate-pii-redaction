@@ -87,6 +87,7 @@ class DocBuilder:
         method: str = "native",
         heading_level: int | None = None,
         ocr_word_conf: list[float] | None = None,
+        ocr_word_boxes: list[tuple[float, float, float, float]] | None = None,
         parent_id: str | None = None,
     ) -> str | None:
         """Append a segment in reading order; whitespace-only text is skipped."""
@@ -104,6 +105,7 @@ class DocBuilder:
                 locator=locator,
                 method="ocr" if method == "ocr" else "native",
                 ocr_word_conf=ocr_word_conf,
+                ocr_word_boxes=ocr_word_boxes,
                 parent_id=parent_id,
             )
         )
@@ -123,12 +125,14 @@ def ocr_segments(
     count = 0
     for line in result.lines:
         box = tuple(round(v / scale, 1) for v in line.box)
+        words = [tuple(round(v / scale, 1) for v in w.box) for w in line.words]
         if b.add(
             "ocr_line",
             line.text,
             locator.model_copy(update={"bbox": box}),
             method="ocr",
             ocr_word_conf=line.confs,
+            ocr_word_boxes=words,  # type: ignore[arg-type]
             parent_id=parent_id,
         ):
             count += 1

@@ -44,7 +44,10 @@ def local(tag: object) -> str:
 
 
 def generic_text(root: etree._Element) -> list[str]:
-    return [t.strip() for t in root.itertext() if t and t.strip()]
+    """Stripped text nodes in document order; the writer edits the same nodes (textmap)."""
+    from cleargate.extract.textmap import generic_text as _generic
+
+    return _generic(root)
 
 
 def author_attributes(root: etree._Element) -> list[tuple[str, str]]:
