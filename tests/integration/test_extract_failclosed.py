@@ -52,13 +52,26 @@ def test_ocr_disabled_scanned_pdf_ends_blocked_g3(
     assert reason.startswith("UNINSPECTED_PARTS=2")
 
 
-def test_ocr_disabled_blocks_even_a_plain_docx_thumbnail(tmp_path: Path, policy: Policy) -> None:
-    # python-docx's template carries docProps/thumbnail.jpeg; without OCR it is unread.
-    state, rule, reason = run_one(
-        settings_for(tmp_path, None), policy, filegen.docx(tmp_path / "plain.docx")
-    )
+def test_ocr_disabled_docx_with_body_images_ends_blocked(tmp_path: Path, policy: Policy) -> None:
+    # Body images cannot be read without OCR and cannot be dropped: never SAFE.
+    state, rule, reason = run_one(settings_for(tmp_path, None), policy, SYNTHETIC / "planted.docx")
     assert (state, rule) == ("BLOCKED", "G3")
-    assert reason.startswith("UNINSPECTED_PARTS=1,")
+    assert reason.startswith("UNINSPECTED_PARTS=")
+
+
+def test_ocr_disabled_unread_thumbnail_is_removed_not_trusted(
+    tmp_path: Path, policy: Policy
+) -> None:
+    # python-docx's template thumbnail is unread without OCR; the writer removes it (TR-RD-10),
+    # so nothing unread reaches the output and the job can be verified (ADR-29).
+    import zipfile
+
+    settings = settings_for(tmp_path, None)
+    state, rule, _ = run_one(settings, policy, filegen.docx(tmp_path / "plain.docx"))
+    assert (state, rule) == ("VALIDATED_SAFE", "G7")
+    (out,) = (settings.data_dir / "jobs").glob("*/out/redacted.docx")
+    with zipfile.ZipFile(out) as zf:
+        assert not [n for n in zf.namelist() if "thumbnail" in n]
 
 
 def test_ocr_disabled_native_pdf_with_image_ends_blocked(tmp_path: Path, policy: Policy) -> None:
@@ -99,27 +112,50 @@ def test_corrupt_image_part_in_docx_ends_blocked(tmp_path: Path, policy: Policy)
     assert "UNINSPECTED_PARTS=1" in reason
 
 
-def test_xxe_in_document_part_is_uninspected(tmp_path: Path, policy: Policy) -> None:
+XXE = (
+    b'<?xml version="1.0"?><!DOCTYPE d [<!ENTITY x SYSTEM "file:///c:/windows/win.ini">]><d>&x;</d>'
+)
+
+
+def test_xxe_in_a_referenced_part_is_uninspected_and_blocks(tmp_path: Path, policy: Policy) -> None:
+    # styles.xml is referenced by the document: it cannot be dropped, so the gate blocks.
     src = filegen.docx(tmp_path / "src.docx")
-    evil = (
-        b'<?xml version="1.0"?><!DOCTYPE d [<!ENTITY x SYSTEM "file:///c:/windows/win.ini">]>'
-        b"<d>&x;</d>"
-    )
-    bad = filegen.rewrite_zip(src, tmp_path / "xxe.docx", add={"customXml/item9.xml": evil})
+    bad = filegen.rewrite_zip(src, tmp_path / "xxe.docx", replace={"word/styles.xml": XXE})
     state, rule, reason = run_one(settings_for(tmp_path, TESS), policy, bad)
     assert (state, rule) == ("BLOCKED", "G3")
     assert reason.startswith("UNINSPECTED_PARTS=1,")
 
 
-def test_real_extraction_still_blocks_until_verification_exists(
+def test_xxe_in_an_unreferenced_part_is_never_parsed_and_is_removed(
     tmp_path: Path, policy: Policy
 ) -> None:
-    # Everything inspected (the template thumbnail needs OCR), but V2, V3, V5 have not run:
-    # never SAFE (ADR-24).
-    state, rule, reason = run_one(
-        settings_for(tmp_path, TESS), policy, filegen.docx(tmp_path / "plain.docx")
-    )
-    assert (state, rule, reason) == ("BLOCKED", "G3", "V2_NOT_RUN,V3_NOT_RUN,V5_NOT_RUN")
+    import zipfile
+
+    src = filegen.docx(tmp_path / "src.docx")
+    bad = filegen.rewrite_zip(src, tmp_path / "xxe.docx", add={"customXml/item9.xml": XXE})
+    settings = settings_for(tmp_path, TESS)
+    state, _, _ = run_one(settings, policy, bad)
+    assert state == "VALIDATED_SAFE"
+    (out,) = (settings.data_dir / "jobs").glob("*/out/redacted.docx")
+    with zipfile.ZipFile(out) as zf:
+        assert "customXml/item9.xml" not in zf.namelist()
+
+
+def test_full_pipeline_verifies_a_clean_docx_with_all_checks(
+    tmp_path: Path, policy: Policy
+) -> None:
+    # Phase 7: every check V1..V6 ran, so a clean file can reach SAFE (ADR-24 satisfied).
+    import json
+
+    settings = settings_for(tmp_path, TESS)
+    state, rule, reason = run_one(settings, policy, filegen.docx(tmp_path / "plain.docx"))
+    assert (state, rule, reason) == ("VALIDATED_SAFE", "G7", "all_rules_passed")
+    store = MetaStore.open(settings.data_dir / "meta.db")
+    try:
+        (row,) = store.conn.execute("SELECT report_json FROM runs").fetchall()
+        assert sorted(json.loads(row[0])["checks_run"]) == ["V1", "V2", "V3", "V4", "V5", "V6"]
+    finally:
+        store.close()
 
 
 @pytest.mark.samples

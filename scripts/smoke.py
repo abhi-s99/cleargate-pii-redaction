@@ -1,6 +1,6 @@
 """Sample smoke run: python scripts/smoke.py [--data-dir out/smoke-data]
 
-Runs the pipeline as far as it exists on the three real sample files and writes a
+Runs the full pipeline on the three real sample files and writes tables
 table (file, state, rule, reason, units, segments by method, regions, uninspected
 parts, time) to out/smoke.md. Counts, types, pages and codes only: no document values.
 
@@ -95,6 +95,33 @@ def main(argv: list[str] | None = None) -> int:
         for j in batch.jobs
         if "ocr_pages" in j.timings
     }
+    detail = [
+        "| File | Redacted by type | Tiers (redacted) | Review items | Actions applied/total | "
+        "V2 leaks | V3 det/other | V4 uninspected | SRS | CRS |",
+        "|---|---|---|---:|---|---:|---|---:|---:|---:|",
+    ]
+    for job in batch.jobs:
+        rows_f = store.findings(job.job_id)
+        red = [r for r in rows_f if r["decision"] in ("auto_redact", "review")]
+        by_type: dict[str, int] = {}
+        tiers: dict[str, int] = {}
+        for r in red:
+            by_type[r["entity_type"]] = by_type.get(r["entity_type"], 0) + 1
+            tiers[r["tier"]] = tiers.get(r["tier"], 0) + 1
+        review = sum(1 for r in rows_f if r["decision"] == "review")
+        run = store.run(job.job_id)
+        if run is None:
+            detail.append(f"| {job.filename} | - | - | - | - | - | - | - | - | - |")
+            continue
+        rep = json.loads(run["report_json"])
+        acts = json.loads(run["actions_json"])
+        applied = sum(1 for a in acts if a["applied"])
+        detail.append(
+            f"| {job.filename} | {json.dumps(by_type, sort_keys=True)} | "
+            f"{json.dumps(tiers, sort_keys=True)} | {review} | {applied}/{len(acts)} | "
+            f"{rep['leak_hits']} | {rep['residual_deterministic']}/{rep['residual_other']} | "
+            f"{rep['uninspected_unmasked']} | {rep['srs']} | {rep['crs']} |"
+        )
     stamp = datetime.now(tz=UTC).isoformat(timespec="seconds")
     gold = ROOT / "eval" / "gold"
     leak = (
@@ -110,6 +137,8 @@ def main(argv: list[str] | None = None) -> int:
             f"batch wall time {wall:.1f} s. Counts only, no document values.",
             "",
             *rows,
+            "",
+            *detail,
             "",
             "Region pages (kind, page): " + json.dumps(region_pages),
             "",

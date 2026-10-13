@@ -151,9 +151,12 @@ def crashing(stage: str, exc: Exception) -> Stages:
         "redact": [s.writer],
         "verify": [s.verifier],
     }[stage]
-    method = {"extract": "extract", "detect": "detect", "redact": "apply", "verify": "verify"}[
-        stage
-    ]
+    method = {
+        "extract": "extract",
+        "detect": "detect_batch",
+        "redact": "apply",
+        "verify": "verify",
+    }[stage]
     for target in targets:
         setattr(target, method, raise_)
     return s
@@ -237,7 +240,7 @@ def test_stage_timings_and_progress(
 def test_mixed_batch(tmp_path: Path, settings: Settings, policy: Policy, store: MetaStore) -> None:
     files = [filegen.docx(tmp_path / "a.docx"), filegen.docx(tmp_path / "b.pdf")]
     batch = Pipeline(settings, policy, store).process_batch(files)
-    assert [j.state for j in batch.jobs] == [JobState.BLOCKED, JobState.FAILED]
+    assert [j.state for j in batch.jobs] == [JobState.VALIDATED_SAFE, JobState.FAILED]
     assert len({j.job_id for j in batch.jobs}) == 2
 
 
@@ -270,7 +273,12 @@ class ClaimsEverythingVerifier(CoverageOnlyVerifier):
 def test_partial_verifier_cannot_produce_safe_even_with_full_coverage(
     tmp_path: Path, settings: Settings, policy: Policy, store: MetaStore
 ) -> None:
-    stages = replace(default_stages(), extractors=[InspectingExtractor()])
+    stages = replace(
+        default_stages(),
+        extractors=[InspectingExtractor()],
+        writer=IdentityWriter(),
+        verifier=CoverageOnlyVerifier(),
+    )
     job_id, _ = run(
         Pipeline(settings, policy, store, stages=stages), filegen.docx(tmp_path / "x.docx")
     )

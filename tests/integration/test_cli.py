@@ -25,12 +25,13 @@ def env(tmp_path: Path) -> dict[str, str]:
     }
 
 
-def test_process_prints_blocked_g3(tmp_path: Path, env: dict[str, str]) -> None:
-    f = filegen.docx(tmp_path / "a.docx")
+def test_process_prints_state_and_rule(tmp_path: Path, env: dict[str, str]) -> None:
+    # Deterministic PII only, so the full pipeline can verify it without review (Phase 7).
+    f = filegen.docx(tmp_path / "a.docx", text="Refund to SSN 900-12-3456 approved.")
     result = runner.invoke(app, ["process", str(f)], env=env)
     assert result.exit_code == 0, result.output
-    assert "BLOCKED" in result.output
-    assert " G3 " in result.output
+    assert "VALIDATED_SAFE" in result.output
+    assert " G7 " in result.output
 
 
 def test_process_json_and_status(tmp_path: Path, env: dict[str, str]) -> None:
@@ -38,7 +39,7 @@ def test_process_json_and_status(tmp_path: Path, env: dict[str, str]) -> None:
     result = runner.invoke(app, ["process", *files, "--json"], env=env)
     assert result.exit_code == 0, result.output
     data = json.loads(result.stdout)
-    assert [j["state"] for j in data["jobs"]] == ["BLOCKED", "FAILED"]
+    assert [j["state"] for j in data["jobs"]] == ["VALIDATED_SAFE", "FAILED"]
     assert data["jobs"][1]["reason"] == "EXTENSION_MISMATCH"
     status = runner.invoke(app, ["status", data["batch_id"]], env=env)
     assert status.exit_code == 0
