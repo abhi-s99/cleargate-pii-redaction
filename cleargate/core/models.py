@@ -164,6 +164,20 @@ class Coverage(_Model):
         self.issues.append(PartIssue(locator=locator, code=code or "UNINSPECTED"))
 
 
+class Region(_Model):
+    """A raster area that needs masking regardless of text (TR-EX-05/06, ADR-26).
+
+    ``unreadable``: an OCR block that is large and low-confidence; ``face``: a Haar face
+    detection. ``locator.bbox`` is in pixels of the analysed raster.
+    """
+
+    kind: Literal["unreadable", "face"]
+    locator: Locator
+    area_ratio: float = Field(ge=0.0, le=1.0)
+    mean_conf: float | None = None
+    word_count: int = 0
+
+
 class Document(_Model):
     doc_id: str
     filename: str
@@ -173,6 +187,8 @@ class Document(_Model):
     units: dict[str, int] = Field(default_factory=dict)
     segments: list[Segment] = Field(default_factory=list)
     coverage: Coverage = Field(default_factory=Coverage)
+    regions: list[Region] = Field(default_factory=list)  # ADR-26
+    extractors: dict[str, str] = Field(default_factory=dict)  # name -> version
 
 
 class Evidence(_Model):

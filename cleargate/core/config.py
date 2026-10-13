@@ -201,6 +201,7 @@ class Settings(BaseModel):
     reviewer_token: SecretStr | None = None
     tesseract_cmd: str | None = None
     policy_path: Path = DEFAULT_POLICY_PATH
+    ocr_workers: int = Field(default_factory=lambda: max(1, min(4, (os.cpu_count() or 2) - 1)))
 
 
 def _secret(env: Mapping[str, str], name: str) -> SecretStr | None:
@@ -244,6 +245,11 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         reviewer_token=_secret(env, "CLEARGATE_REVIEWER_TOKEN"),
         tesseract_cmd=resolve_tesseract(env),
         policy_path=Path(policy) if policy else DEFAULT_POLICY_PATH,
+        **(
+            {"ocr_workers": int(w)}
+            if (w := env.get("CLEARGATE_OCR_WORKERS", "").strip()).isdigit()
+            else {}
+        ),
     )
 
 

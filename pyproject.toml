@@ -56,7 +56,7 @@ cleargate = "cleargate.cli:main"
 include = ["cleargate*"]
 
 [tool.setuptools.package-data]
-cleargate = ["py.typed"]
+cleargate = ["py.typed", "extract/models/*.onnx", "extract/models/*.md"]
 
 # ---------------------------------------------------------------- pytest
 [tool.pytest.ini_options]
