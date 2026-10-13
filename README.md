@@ -67,7 +67,7 @@ Sanitized: [PERSON_1] from Finance can be contacted at [EMAIL_1].
 | Project bootstrap: policy config + hash, CDM models (raw fields never serialise), typed errors, PII-safe logging, doctor | Yes | Yes | Yes ([Phase 0](docs/phases/PHASE-00-bootstrap.md)) |
 | File validation & batch ingestion (CLI) | Yes | Yes | Yes ([Phase 2](docs/phases/PHASE-02-skeleton.md)) |
 | Canonical Document Model + PDF/DOCX/PPTX/image extractors with OCR, faces, regions | Yes | Yes | Yes ([Phase 3](docs/phases/PHASE-03-extract.md)) |
-| Layered detection (L1–L5) + allowlist + evidence tiers | Yes | No | No |
+| Layered detection (L1–L5) + allowlist + evidence tiers | Yes | Yes | Yes ([Phase 4](docs/phases/PHASE-04-detect-rules.md), [Phase 5](docs/phases/PHASE-05-detect-context.md)) |
 | Token redaction + encrypted vault | Yes | No | No |
 | Format-native writers (scanned PDF, native PDF, DOCX, PPTX, images) | Yes | No | No |
 | Independent verification (V1–V6) | Yes | No | No |

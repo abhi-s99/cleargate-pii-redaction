@@ -6,6 +6,18 @@ phase tags (`v0.NN.0`).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-14: Phase 5, context-aware detection
+
+### Added
+- Pre-split and normalisation with offset maps (TR-DT-01/02); Presidio + spaCy
+  `en_core_web_lg` NER loaded once per process (TR-DT-13, TR-PF-05).
+- Person context rules, batch person registry with variants, exact/fuzzy/surname
+  propagation and opaque person keys (TR-DT-14/15); allowlist that suppresses only NER-only
+  terms (FR-06); region findings for faces and unreadable areas (TR-DT-16).
+- `DetectionEngine.detect_batch` with `default` and `verify` profiles; value propagation of
+  every redacted value across the batch (ADR-28).
+- `Finding.locator` and `findings.locator_json` (schema 2, migrated in place).
+
 ## [0.4.0] - 2026-10-14: Phase 4, deterministic detection
 
 ### Added

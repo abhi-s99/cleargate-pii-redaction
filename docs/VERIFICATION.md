@@ -12,7 +12,7 @@ Status values:
 - **XFAIL**: a known limitation, kept as a strict `xfail` test with a reason.
 - **TODO**: not implemented yet (target phase shown).
 
-Last updated: Phase 4 (14 Oct 2026).
+Last updated: Phase 5 (14 Oct 2026).
 
 | ID | Requirement | Phase | Tests | Status |
 |---|---|---|---|---|
@@ -20,9 +20,9 @@ Last updated: Phase 4 (14 Oct 2026).
 | FR-02 | Batch workflow, background progress | 8 | - | TODO |
 | FR-03 | Structure-aware extraction (extraction done; report listing OCR pages in Phase 8) | 3, 8 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator`<br>`tests/integration/test_extract_samples.py::test_docx_structure_matches_profile` | PARTIAL |
 | FR-04 | Source traceability (locators on every segment; report and review in Phase 8) | 3, 8 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator` | PARTIAL |
-| FR-05 | Layered detection (L1, L2, L4 subset done; NER and registry in Phase 5) | 4, 5 | `tests/unit/test_recognizers.py::test_label_anchored_positives`<br>`tests/unit/test_recognizers.py::test_ssn_positives` | PARTIAL |
-| FR-06 | People vs business entities | 5 | - | TODO |
-| FR-07 | Evidence tiers, threshold-driven routing (calibration is Phase 10, ADR-28) | 4, 10 | `tests/unit/test_merge.py::test_threshold_changes_routing`<br>`tests/unit/test_merge.py::test_tiers` | PARTIAL |
+| FR-05 | Layered detection: L1 validators, L2 labels, L3 NER, L4 context, L5 registry | 4, 5 | `tests/integration/test_detect_fixtures.py::test_planted_item_detected_with_type_and_redacted`<br>`tests/unit/test_recognizers.py::test_label_anchored_positives`<br>`tests/unit/test_detect_context.py::test_three_names_in_one_cell_give_three_person_findings` | PASS |
+| FR-06 | People vs business entities (allowlist suppresses NER-only terms; people in the same sentence redacted) | 5 | `tests/unit/test_detect_context.py::test_products_kept_while_people_in_same_sentence_are_redacted`<br>`tests/unit/test_detect_context.py::test_allowlist_term_that_is_a_registered_person_is_redacted`<br>`tests/integration/test_detect_fixtures.py::test_decoys_are_not_redacted` | PASS |
+| FR-07 | Evidence tiers, threshold-driven routing (calibration itself is Phase 10, ADR-28) | 5, 10 | `tests/unit/test_merge.py::test_threshold_changes_routing`<br>`tests/unit/test_merge.py::test_tiers` | PARTIAL |
 | FR-08 | Typed tokens, batch-consistent pseudonyms | 6 | - | TODO |
 | FR-09 | Secure redacted files, no overlays | 6 | - | TODO |
 | FR-10 | Independent verification | 7 | - | TODO |
@@ -43,15 +43,15 @@ Last updated: Phase 4 (14 Oct 2026).
 | G5 | V5 failed -> BLOCKED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins` | PASS |
 | G6 | Open review item, masked regions, V3 other, SRS low or unmeasured -> REVIEW_REQUIRED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins` | PASS |
 | G7 | All pass -> VALIDATED_SAFE (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_safe_only_when_nothing_fires`<br>`tests/unit/test_gate_properties.py::test_safe_iff_no_rule_fires` | PASS |
-| TR-DT-01 | Pre-split sub-spans before NER | 5 | - | TODO |
-| TR-DT-02 | OCR text normalisation with offset map | 5 | - | TODO |
+| TR-DT-01 | Pre-split sub-spans before NER | 5 | `tests/unit/test_detect_context.py::test_presplit_cell_offsets`<br>`tests/unit/test_detect_context.py::test_three_names_without_header_still_split` | PASS |
+| TR-DT-02 | OCR text normalisation with offset map | 5 | `tests/unit/test_detect_context.py::test_ocr_normalisation_maps_back` | PASS |
 | TR-DT-10 | L1 deterministic recognizers + validators (5+ positives, 5+ negatives, OCR-damaged cases each) | 4 | `tests/unit/test_recognizers.py::test_ssn_positives`<br>`tests/unit/test_recognizers.py::test_ssn_negatives`<br>`tests/unit/test_recognizers.py::test_business_pan_is_discarded_with_reason`<br>`tests/unit/test_recognizers.py::test_pesel_checksum_positives`<br>`tests/unit/test_recognizers.py::test_card_positives`<br>`tests/unit/test_recognizers.py::test_phone_negatives` | PASS |
 | TR-DT-11 | L2 label-anchored capture, column headers and row labels | 4 | `tests/unit/test_recognizers.py::test_label_anchored_positives`<br>`tests/unit/test_recognizers.py::test_label_anchored_negatives`<br>`tests/unit/test_recognizers.py::test_column_header_applies_to_every_cell`<br>`tests/unit/test_recognizers.py::test_row_label_applies_to_value_cell` | PASS |
 | TR-DT-12 | L2 OCR-confusion tolerance (OCR segments only, at most 2 substitutions) | 4 | `tests/unit/test_recognizers.py::test_ocr_confusion_repairs_value_on_ocr_segments`<br>`tests/unit/test_recognizers.py::test_ocr_confusion_not_applied_to_native_text`<br>`tests/unit/test_recognizers.py::test_ocr_confusion_limited_to_two_substitutions` | PASS |
-| TR-DT-13 | L3 Presidio + spaCy NER | 5 | - | TODO |
-| TR-DT-14 | L4 context rules (partial financial, SSN last-4, home address done; person context in Phase 5) | 4, 5 | `tests/unit/test_recognizers.py::test_partial_financial_positives`<br>`tests/unit/test_recognizers.py::test_ssn_last_four`<br>`tests/unit/test_recognizers.py::test_home_address_with_trigger`<br>`tests/unit/test_recognizers.py::test_corporate_addresses_are_kept` | PARTIAL |
-| TR-DT-15 | L5 registry and propagation | 5 | - | TODO |
-| TR-DT-16 | Region findings (faces, unreadable) | 5 | - | TODO |
+| TR-DT-13 | L3 Presidio + spaCy NER (PERSON; ORG for allowlist learning; digit spans dropped) | 5 | `tests/unit/test_detect_context.py::test_incident_ids_are_not_people`<br>`tests/unit/test_detect_context.py::test_model_unavailable_fails_closed` | PASS |
+| TR-DT-14 | L4 context rules: person labels and headers, honorifics, initials, partial financial, SSN last-4, home address | 4, 5 | `tests/unit/test_recognizers.py::test_partial_financial_positives`<br>`tests/unit/test_recognizers.py::test_ssn_last_four`<br>`tests/unit/test_recognizers.py::test_home_address_with_trigger`<br>`tests/unit/test_recognizers.py::test_corporate_addresses_are_kept`<br>`tests/unit/test_detect_context.py::test_two_common_word_name_under_created_by_is_corroborated`<br>`tests/unit/test_detect_context.py::test_honorific_led_by_and_label_names_are_caught` | PASS |
+| TR-DT-15 | L5 registry, variants, propagation (exact, fuzzy OCR, unique surname), batch-wide person keys | 5 | `tests/unit/test_detect_context.py::test_canonical_key_and_variants`<br>`tests/unit/test_detect_context.py::test_fuzzy_ocr_match_and_native_exactness`<br>`tests/unit/test_detect_context.py::test_surname_only_rules`<br>`tests/unit/test_detect_context.py::test_initial_surname_header_is_linked_to_registered_person` | PASS |
+| TR-DT-16 | Region findings (faces, unreadable) | 5 | `tests/unit/test_detect_context.py::test_region_findings`<br>`tests/integration/test_detect_fixtures.py::test_expected_regions_become_findings` | PASS |
 | TR-DT-30 | Calibration (k-fold) | 10 | - | TODO |
 | TR-EX-01 | PDF native chars and image coverage | 3 | `tests/integration/test_extract_fixtures.py::test_scanned_pdf_has_no_native_text_and_all_pages_ocr`<br>`tests/integration/test_extract_samples.py::test_pdf_is_fully_scanned_and_fig3_is_flagged` | PASS |
 | TR-EX-02 | PDF OCR routing rule and native/OCR merge | 3 | `tests/integration/test_extract_fixtures.py::test_mixed_page_routes_to_ocr_and_drops_duplicate_ocr_lines`<br>`tests/integration/test_extract_fixtures.py::test_scanned_pdf_has_no_native_text_and_all_pages_ocr` | PASS |
@@ -85,7 +85,7 @@ Last updated: Phase 4 (14 Oct 2026).
 | TR-PF-02 | DOCX with screenshots <= 3 min | 11 | - | TODO |
 | TR-PF-03 | Scanned PDF <= 20 s/page | 11 | - | TODO |
 | TR-PF-04 | Progress at least every 5 s | 9 | - | TODO |
-| TR-PF-05 | spaCy loaded once per worker | 5 | - | TODO |
+| TR-PF-05 | spaCy loaded once per process, shared by NER and the word list | 5 | `tests/unit/test_detect_context.py::test_spacy_model_loaded_once_per_process` | PASS |
 | TR-RD-01 | Batch-scoped typed tokens | 6 | - | TODO |
 | TR-RD-02 | Fernet vault, refuse start without key (key presence/format check only) | 0, 6 | `tests/unit/test_config.py::test_vault_key_validation` | PARTIAL |
 | TR-RD-10 | DOCX/PPTX run-level writer | 6 | - | TODO |
