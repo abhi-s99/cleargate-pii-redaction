@@ -193,6 +193,26 @@ class RedactionAction(_Model):
     error_code: str | None = None
 
 
+class VerificationReport(_Model):
+    """Outcome of checks V1..V6 (TRD 8.1) as the gate reads them. Counts only, no values.
+
+    Phase 7 produces it from the independent re-extraction path; the gate (Phase 1)
+    only consumes it. ``verifiers`` records name -> version for reproducibility.
+    """
+
+    job_id: str
+    reopen_ok: bool  # V1
+    leak_hits: int = Field(0, ge=0)  # V2
+    residual_deterministic: int = Field(0, ge=0)  # V3, blocking
+    residual_other: int = Field(0, ge=0)  # V3, review
+    uninspected_unmasked: int = Field(0, ge=0)  # V4
+    unit_counts_equal: bool = True  # V4: pages/slides/images unchanged
+    consistency_ok: bool = True  # V5
+    srs: float | None = Field(None, ge=0.0, le=1.0)  # V6
+    crs: float | None = Field(None, ge=0.0, le=1.0)  # V6
+    verifiers: dict[str, str] = Field(default_factory=dict)
+
+
 # Every model field that holds raw content. Tests assert none of them serialise.
 RAW_FIELDS: dict[type[BaseModel], tuple[str, ...]] = {
     Segment: ("text",),
