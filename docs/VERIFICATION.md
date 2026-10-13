@@ -12,14 +12,14 @@ Status values:
 - **XFAIL**: a known limitation, kept as a strict `xfail` test with a reason.
 - **TODO**: not implemented yet (target phase shown).
 
-Last updated: Phase 2 (13 Oct 2026).
+Last updated: Phase 3 (14 Oct 2026).
 
 | ID | Requirement | Phase | Tests | Status |
 |---|---|---|---|---|
 | FR-01 | Ingestion and validation | 2 | `tests/integration/test_pipeline.py::test_invalid_input_ends_failed_with_specific_code`<br>`tests/unit/test_validator.py::test_samples_are_accepted` | PASS |
 | FR-02 | Batch workflow, background progress | 8 | - | TODO |
-| FR-03 | Structure-aware extraction, OCR fallback | 3 | - | TODO |
-| FR-04 | Source traceability per finding | 3 | - | TODO |
+| FR-03 | Structure-aware extraction (extraction done; report listing OCR pages in Phase 8) | 3, 8 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator`<br>`tests/integration/test_extract_samples.py::test_docx_structure_matches_profile` | PARTIAL |
+| FR-04 | Source traceability (locators on every segment; report and review in Phase 8) | 3, 8 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator` | PARTIAL |
 | FR-05 | Layered detection | 4 | - | TODO |
 | FR-06 | People vs business entities | 5 | - | TODO |
 | FR-07 | Evidence tiers, calibrated routing | 5 | - | TODO |
@@ -33,12 +33,12 @@ Last updated: Phase 2 (13 Oct 2026).
 | FR-15 | Evaluation harness | 10 | - | TODO |
 | FR-16 | Audit trail, policy hash per job (history and immutable hash; reports in Phase 8) | 1, 8 | `tests/unit/test_db.py::test_history_records_every_change_with_rule_reason_and_time`<br>`tests/unit/test_db.py::test_policy_hash_is_immutable` | PARTIAL |
 | FR-17 | YAML policy configuration and hash (load, validate, hash; per-job recording in Phase 1) | 0 | `tests/unit/test_config.py::test_default_policy_loads`<br>`tests/unit/test_config.py::test_policy_hash_stable_across_key_reordering_in_yaml`<br>`tests/unit/test_config.py::test_invalid_policies_are_rejected` | PARTIAL |
-| FR-18 | Standalone images | 3 | - | TODO |
+| FR-18 | Standalone images (extraction done; redaction in Phase 6) | 3, 6 | `tests/integration/test_extract_fixtures.py::test_coverage_is_complete` | PARTIAL |
 | FR-19 | XLSX (MAY) | stretch | - | TODO |
 | G0 | Exception, V1 fail, vault unavailable, missing verification, handle mint failure -> FAILED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins`<br>`tests/unit/test_gate_machine.py::test_decide_without_sanitized_file_fails_closed`<br>`tests/integration/test_pipeline.py::test_crash_in_any_stage_ends_failed`<br>`tests/integration/test_pipeline.py::test_crash_in_gate_decision_ends_failed` | PASS |
 | G1 | V2 needle found -> BLOCKED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins` | PASS |
 | G2 | V3 new DETERMINISTIC -> BLOCKED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins` | PASS |
-| G3 | V4 uninspected part, unit counts, masked regions under block -> BLOCKED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins`<br>`tests/integration/test_pipeline.py::test_valid_file_ends_blocked_by_g3`<br>`tests/unit/test_gate_rules.py::test_partial_verifier_blocks_via_g3` | PASS |
+| G3 | V4 uninspected part, unit counts, masked regions under block -> BLOCKED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins`<br>`tests/integration/test_pipeline.py::test_valid_file_ends_blocked_by_g3`<br>`tests/unit/test_gate_rules.py::test_partial_verifier_blocks_via_g3`<br>`tests/integration/test_extract_failclosed.py::test_ocr_disabled_scanned_pdf_ends_blocked_g3` | PASS |
 | G4 | Unapplied action -> BLOCKED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins` | PASS |
 | G5 | V5 failed -> BLOCKED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins` | PASS |
 | G6 | Open review item, masked regions, V3 other, SRS low or unmeasured -> REVIEW_REQUIRED (rule logic; V-inputs arrive in Phase 7) | 1 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone`<br>`tests/unit/test_gate_rules.py::test_rule_ordering_first_match_wins` | PASS |
@@ -53,23 +53,23 @@ Last updated: Phase 2 (13 Oct 2026).
 | TR-DT-15 | L5 registry and propagation | 5 | - | TODO |
 | TR-DT-16 | Region findings (faces, unreadable) | 5 | - | TODO |
 | TR-DT-30 | Calibration (k-fold) | 10 | - | TODO |
-| TR-EX-01 | PDF native chars and image coverage | 3 | - | TODO |
-| TR-EX-02 | PDF OCR routing rule | 3 | - | TODO |
-| TR-EX-03 | OCR embedded images on native pages | 3 | - | TODO |
-| TR-EX-04 | OCR 300 DPI, line segments, confidences | 3 | - | TODO |
-| TR-EX-05 | Unreadable-region detection | 3 | - | TODO |
-| TR-EX-06 | Face detection | 3 | - | TODO |
-| TR-EX-07 | PDF metadata segments | 3 | - | TODO |
-| TR-EX-08 | OCR cache key | 3 | - | TODO |
-| TR-EX-10 | DOCX ordered body walk | 3 | - | TODO |
-| TR-EX-11 | DOCX headers, notes, alt text, docProps | 3 | - | TODO |
-| TR-EX-12 | DOCX image OCR, EMF/WMF/SVG | 3 | - | TODO |
-| TR-EX-13 | DOCX heading level and lists | 3 | - | TODO |
-| TR-EX-20 | PPTX recursive shapes, tables, notes | 3 | - | TODO |
-| TR-EX-21 | PPTX picture OCR, logo de-duplication | 3 | - | TODO |
-| TR-EX-22 | PPTX docProps | 3 | - | TODO |
-| TR-EX-30 | Image EXIF and OCR path | 3 | - | TODO |
-| TR-EX-40 | Coverage accounting | 3 | - | TODO |
+| TR-EX-01 | PDF native chars and image coverage | 3 | `tests/integration/test_extract_fixtures.py::test_scanned_pdf_has_no_native_text_and_all_pages_ocr`<br>`tests/integration/test_extract_samples.py::test_pdf_is_fully_scanned_and_fig3_is_flagged` | PASS |
+| TR-EX-02 | PDF OCR routing rule and native/OCR merge | 3 | `tests/integration/test_extract_fixtures.py::test_mixed_page_routes_to_ocr_and_drops_duplicate_ocr_lines`<br>`tests/integration/test_extract_fixtures.py::test_scanned_pdf_has_no_native_text_and_all_pages_ocr` | PASS |
+| TR-EX-03 | OCR embedded images on native pages | 3 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator`<br>`tests/integration/test_extract_failclosed.py::test_ocr_disabled_native_pdf_with_image_ends_blocked` | PASS |
+| TR-EX-04 | OCR 300 DPI, line segments, word confidences | 3 | `tests/integration/test_extract_fixtures.py::test_ocr_segments_carry_word_confidences`<br>`tests/unit/test_extract_units.py::test_parse_data_groups_lines_and_drops_empty_or_negative` | PASS |
+| TR-EX-05 | Unreadable regions: low-confidence blocks and connected non-text regions (ADR-27) | 3 | `tests/unit/test_extract_units.py::test_unreadable_block_rules`<br>`tests/unit/test_extract_units.py::test_nontext_region_found_when_no_words_inside`<br>`tests/integration/test_extract_fixtures.py::test_illegible_region_is_not_read_as_text`<br>`tests/integration/test_extract_samples.py::test_pdf_is_fully_scanned_and_fig3_is_flagged` | PASS |
+| TR-EX-06 | Face detection: Haar plus YuNet (ADR-27) | 3 | `tests/unit/test_extract_units.py::test_faces_found_on_public_domain_photo_not_on_text`<br>`tests/integration/test_extract_fixtures.py::test_expected_regions_are_found`<br>`tests/integration/test_extract_samples.py::test_pdf_is_fully_scanned_and_fig3_is_flagged` | PASS |
+| TR-EX-07 | PDF Info and XMP metadata segments | 3 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator`<br>`tests/integration/test_extract_samples.py::test_pdf_is_fully_scanned_and_fig3_is_flagged` | PASS |
+| TR-EX-08 | OCR cache key (raster sha + dpi + engine + parser version), encrypted at rest (ADR-26) | 3 | `tests/unit/test_extract_units.py::test_raster_key_depends_on_pixels_dpi_and_engine`<br>`tests/unit/test_extract_units.py::test_cache_key_includes_parser_version`<br>`tests/unit/test_extract_units.py::test_ocr_cache_is_encrypted_and_reused` | PASS |
+| TR-EX-10 | DOCX ordered body walk, merged cells once, Fallback de-duplicated | 3 | `tests/integration/test_extract_fixtures.py::test_segments_are_in_reading_order`<br>`tests/integration/test_extract_fixtures.py::test_merged_cells_and_textbox_extracted_once`<br>`tests/integration/test_extract_fixtures.py::test_vmerge_continuation_cell_is_not_a_segment`<br>`tests/unit/test_extract_units.py::test_paragraph_text_includes_deleted_text_and_field_codes_but_not_fallback` | PASS |
+| TR-EX-11 | DOCX headers, comments, alt text, docProps done; footnotes, endnotes and custom.xml parsed but not in fixtures | 3 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator`<br>`tests/integration/test_extract_samples.py::test_docx_structure_matches_profile`<br>`tests/unit/test_extract_units.py::test_author_attributes_are_collected_once` | PARTIAL |
+| TR-EX-12 | DOCX image OCR with 2x upscale done, EMF rasterised on Windows; SVG text path untested | 3 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator`<br>`tests/integration/test_extract_failclosed.py::test_corrupt_image_part_in_docx_ends_blocked`<br>`tests/unit/test_extract_units.py::test_ink_ratio_and_prepare` | PARTIAL |
+| TR-EX-13 | DOCX heading level and lists (incl. list styles) | 3 | `tests/integration/test_extract_fixtures.py::test_heading_level_and_list_membership` | PASS |
+| TR-EX-20 | PPTX shapes, groups, tables, notes done; chart text untested | 3 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator`<br>`tests/integration/test_extract_samples.py::test_pptx_structure_matches_profile` | PARTIAL |
+| TR-EX-21 | PPTX picture OCR, logo analysed once | 3 | `tests/integration/test_extract_fixtures.py::test_repeated_logo_is_analysed_once`<br>`tests/integration/test_extract_fixtures.py::test_expected_regions_are_found` | PASS |
+| TR-EX-22 | PPTX docProps | 3 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator` | PASS |
+| TR-EX-30 | Image EXIF metadata and OCR path (EXIF stripping is Phase 6) | 3, 6 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator` | PARTIAL |
+| TR-EX-40 | Coverage accounting with a code per uninspected part (ADR-23) | 3 | `tests/integration/test_extract_fixtures.py::test_coverage_is_complete`<br>`tests/integration/test_extract_fixtures.py::test_pptx_printer_settings_binary_is_uninspected`<br>`tests/integration/test_extract_failclosed.py::test_ocr_disabled_scanned_pdf_ends_blocked_g3`<br>`tests/integration/test_extract_failclosed.py::test_xxe_in_document_part_is_uninspected` | PASS |
 | TR-GT-01 | Transition whitelist | 1 | `tests/unit/test_gate_machine.py::test_allowed_transition_succeeds`<br>`tests/unit/test_gate_machine.py::test_illegal_transition_raises_and_changes_nothing`<br>`tests/unit/test_gate_machine.py::test_whitelist_is_exactly_trd_gt_01`<br>`tests/unit/test_gate_properties.py::test_safe_iff_no_rule_fires` | PASS |
 | TR-GT-02 | DB CHECK constraint and trigger (ticket per transaction, ADR-20) | 1 | `tests/unit/test_db.py::test_direct_update_from_received_is_rejected`<br>`tests/unit/test_db.py::test_direct_update_to_safe_from_processing_is_rejected`<br>`tests/unit/test_db.py::test_forged_history_row_without_ticket_is_rejected`<br>`tests/unit/test_db.py::test_ticket_must_point_at_newest_history_row`<br>`tests/unit/test_db.py::test_check_constraint_rejects_unknown_state`<br>`tests/unit/test_db.py::test_history_is_append_only` | PASS |
 | TR-GT-03 | SafeHandle mint/verify, only via decide() (ADR-22) | 1 | `tests/unit/test_gate_handle.py::test_tampering_any_field_is_refused`<br>`tests/unit/test_gate_handle.py::test_sanitized_file_changed_on_disk_is_refused`<br>`tests/unit/test_gate_machine.py::test_decide_clean_input_mints_handle_and_is_safe`<br>`tests/unit/test_gate_machine.py::test_public_transition_can_never_enter_safe` | PASS |
@@ -104,7 +104,7 @@ Last updated: Phase 2 (13 Oct 2026).
 | TR-SEC-04 | Restricted job dirs (0700 / Windows ACL, ADR-25), O_EXCL, safe filenames | 2 | `tests/unit/test_storage.py::test_job_dir_is_created_once_and_restricted`<br>`tests/unit/test_storage.py::test_upload_is_stored_as_original_with_o_excl`<br>`tests/unit/test_storage.py::test_display_names_are_sanitised`<br>`tests/integration/test_pipeline.py::test_upload_is_stored_under_job_dir_as_original` | PASS |
 | TR-SEC-05 | Server-side state enforcement on artifacts | 8 | - | TODO |
 | TR-SEC-06 | TTL sweeper and batch delete (store-level delete done; sweeper and endpoint in Phase 8) | 1, 8 | `tests/unit/test_db.py::test_delete_batch_removes_jobs_history_and_findings` | PARTIAL |
-| TR-SEC-07 | Parser hardening (DTD/XXE, zip bomb, page and image limits done; OCR timeout Phase 3; RLIMIT_AS Phase 11) | 2, 3, 11 | `tests/unit/test_validator.py::test_xxe_in_content_types_is_rejected`<br>`tests/unit/test_validator.py::test_billion_laughs_is_rejected`<br>`tests/unit/test_validator.py::test_zip_bomb_by_ratio`<br>`tests/unit/test_validator.py::test_too_many_pages` | PARTIAL |
+| TR-SEC-07 | Parser hardening (DTD/XXE, zip bomb, page and image limits done; OCR timeout and XML parts done; RLIMIT_AS Phase 11) | 2, 3, 11 | `tests/unit/test_validator.py::test_xxe_in_content_types_is_rejected`<br>`tests/unit/test_validator.py::test_billion_laughs_is_rejected`<br>`tests/unit/test_validator.py::test_zip_bomb_by_ratio`<br>`tests/unit/test_validator.py::test_too_many_pages`<br>`tests/integration/test_extract_failclosed.py::test_ocr_timeout_marks_page_uninspected`<br>`tests/integration/test_extract_failclosed.py::test_xxe_in_document_part_is_uninspected` | PARTIAL |
 | TR-SEC-08 | No original XObjects or thumbnails in output | 6 | - | TODO |
 | TR-SEC-09 | Documented prototype limits | 11 | - | TODO |
 | V1 | Output reopens via two parsers | 7 | - | TODO |

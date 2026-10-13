@@ -162,3 +162,53 @@ context, decision, alternatives and consequences.
 - **Alternatives:** hashing the display name (loses the FR-13 file name).
 - **Consequences:** `RLIMIT_AS` (TR-SEC-07) remains POSIX-only; the Phase 11 Docker image
   provides it. A filename that is itself PII is a documented residual risk.
+
+### ADR-26: Extraction coverage beyond the TRD part list; encrypted OCR cache; regions in the CDM
+- **Context:** Implementing TRD 5 showed places where personal data lives that the TRD part
+  lists do not name: person names in XML *attributes* (`w:ins/@w:author`, comment authors and
+  initials, `w15:person`, PowerPoint `cmAuthor/@name`), tracked deletions (`w:delText`) and
+  field codes (`w:instrText`, e.g. `mailto:`) that stay in the file, external relationship
+  targets in `.rels` parts, PDF annotations with author titles, link URIs, outline titles,
+  form fields and embedded files, and a `[trash]` remnant part in the sample DOCX. Separately,
+  the TR-EX-08 OCR cache would hold document text on disk in clear, and TRD 4 has no place
+  for face and unreadable regions.
+- **Decision:** Extract all of the above as segments. Run a generic sweep over every package
+  part a structured walker did not handle: XML parts are text-swept, images are analysed,
+  fonts count as inspected, anything else is uninspected (`EMBEDDED_OBJECT`), so nothing in
+  a package goes unaccounted for. Encrypt OCR cache entries at rest with the vault key
+  (Fernet); without a key, cache in memory only. The cache key adds the Tesseract config and
+  a parser version to TR-EX-08's `sha256(raster) + dpi + tesseract version`, because entries
+  store derived block statistics (a stale entry hid a fix during development). Add
+  `Region(kind, locator, area_ratio, mean_conf, word_count)` and `Document.regions`, plus
+  `Document.extractors` (name -> version).
+- **Consequences:** More coverage blocks: `printerSettings*.bin` in PPTX packages and the DOCX
+  `[trash]` part are uninspected until the Phase 6 writer removes them. Without a vault key,
+  OCR is never cached on disk.
+
+### ADR-27: Face and unreadable-region detection on the real samples
+- **Context:** On the real PDF, the TR-EX-06 Haar cascades found no face on p.9 (Fig. 3) at
+  any scale or sensitivity setting: the face is about 13 x 17 px at 150 DPI. The TR-EX-05 block
+  rule did not flag Fig. 3 either, because Tesseract recognised no words in it at all. The
+  TRD also names "connected non-text regions", which the first implementation omitted. The
+  block rule flagged the clean RACI table on p.32, because single-letter cells score low
+  (Architecture D2).
+- **Decision:** Face detection is the union of OpenCV YuNet (`FaceDetectorYN`, bundled
+  232 KB MIT-licensed model from OpenCV Zoo, run offline) and the TR-EX-06 Haar cascades
+  (frontal, profile, mirrored profile), merged. Implement the connected non-text region rule
+  for scanned PDF pages: blank recognised word boxes, join remaining ink, and flag components
+  of at least `min_area_ratio` of the page whose words (2+ characters) are absent, below
+  `max_mean_conf`, or at least 40 % below `word_conf_floor`. Embedded images (screenshots)
+  keep the block rule only, because their coloured UI panels would flood the region rule. Block
+  statistics ignore single-character words when the block has longer ones. No threshold was
+  changed.
+- **Alternatives:** keep Haar only (Fig. 3 face missed; criterion fails); lower Haar
+  `minNeighbors` (false faces on text, still no hit on p.9); raise the 70 confidence threshold
+  (forbidden: never weaken a threshold).
+- **Also:** an embedded picture with visible ink, no recognised words and no face gets a
+  whole-image unreadable region (mask and review), so a screenshot OCR cannot read at all
+  is never treated as empty. On the sample DOCX this affects one EMF diagram.
+- **Consequences:** On the real PDF, YuNet finds exactly one face (p.9, inside the Fig. 3
+  region) and no false faces on the other 34 pages. Unreadable regions: p.9 (Fig. 3), p.18
+  (Fig. 8, two regions) and five more small candidates (pp. 12, 14, 15, 19, 20) whose truth is
+  unknown until gold labels exist; p.32 is no longer flagged. Region rules for embedded images
+  are weaker than for pages (block rule plus the whole-image rule above).

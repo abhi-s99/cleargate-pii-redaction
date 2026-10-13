@@ -5,7 +5,7 @@ ClearGate extracts text from PDFs (including scans), Word and PowerPoint files, 
 
 Built for the **Optiv Consulting case study PS-2: Text Analysis and PII Detection** (client scenario: Cadence Financial Group).
 
-> **Status: Phase 2 (walking skeleton) complete.** Validation, upload storage, the pipeline orchestrator, the CLI and the privacy gate exist and are tested; extraction, detection, redaction and verification are still stubs, so every valid file ends `BLOCKED`. The [status table](#status) is the source of truth for what exists, and nothing here should be read as "it works" until that table says *Verified*. The commands under [Quick start](#quick-start-planned) are the target interface. Progress: [docs/PROGRESS.md](docs/PROGRESS.md); test traceability: [docs/VERIFICATION.md](docs/VERIFICATION.md).
+> **Status: Phase 3 (extraction) complete.** Validation, PDF/DOCX/PPTX/image extraction with OCR, face and unreadable-region detection, the pipeline, the CLI and the privacy gate exist and are tested on synthetic fixtures and the real samples. Detection, redaction and verification are not built yet, so every file still ends `BLOCKED`. The [status table](#status) is the source of truth for what exists, and nothing here should be read as "it works" until that table says *Verified*. The commands under [Quick start](#quick-start-planned) are the target interface. Progress: [docs/PROGRESS.md](docs/PROGRESS.md); test traceability: [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
 [PRD](docs/PRD.md) · [Architecture & technical decisions](docs/Architecture.md) · [TRD](docs/TRD.md)
 
@@ -66,7 +66,7 @@ Sanitized: [PERSON_1] from Finance can be contacted at [EMAIL_1].
 | Sample-file structure analysis (PDF/DOCX/PPTX profiling, OCR timing, NER probes) | Yes | Yes (one-off scripts) | Yes (findings in Architecture §2) |
 | Project bootstrap: policy config + hash, CDM models (raw fields never serialise), typed errors, PII-safe logging, doctor | Yes | Yes | Yes ([Phase 0](docs/phases/PHASE-00-bootstrap.md)) |
 | File validation & batch ingestion (CLI) | Yes | Yes | Yes ([Phase 2](docs/phases/PHASE-02-skeleton.md)) |
-| Canonical Document Model + PDF/DOCX/PPTX extractors with OCR fallback | Yes | No | No |
+| Canonical Document Model + PDF/DOCX/PPTX/image extractors with OCR, faces, regions | Yes | Yes | Yes ([Phase 3](docs/phases/PHASE-03-extract.md)) |
 | Layered detection (L1–L5) + allowlist + evidence tiers | Yes | No | No |
 | Token redaction + encrypted vault | Yes | No | No |
 | Format-native writers (scanned PDF, native PDF, DOCX, PPTX, images) | Yes | No | No |

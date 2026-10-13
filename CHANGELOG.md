@@ -6,6 +6,20 @@ phase tags (`v0.NN.0`).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-14: Phase 3, extraction and synthetic fixtures
+
+### Added
+- PDF, DOCX, PPTX and image extractors (TRD 5) with OCR in a process pool, encrypted and
+  versioned OCR cache, YuNet + Haar face detection, unreadable-block and non-text-region
+  rules, metadata, and a generic part sweep so no package part goes unaccounted for
+  (ADR-26, ADR-27).
+- Deterministic planted-PII fixtures (`tests/fixtures/make_fixtures.py`, 63 items) and a
+  manifest matcher shared by later phases.
+- `make smoke` runs the full pipeline on the real samples (counts only).
+
+### Fixed
+- `.rels` parts were classified as embedded objects; list styles were not detected as lists.
+
 ## [0.2.0] - 2026-10-13: Phase 2, walking skeleton
 
 ### Added
