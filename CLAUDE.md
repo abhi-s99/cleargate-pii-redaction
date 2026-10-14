@@ -64,7 +64,8 @@ If a step fails three times, stop, write down what was tried, and ask.
   `<type>(<scope>): <subject>`. Types: feat fix test refactor perf docs chore build ci.
   Scopes: core gate ingest extract ocr detect redact vault verify api ui report eval cli
   config deps docs phase. Optional body (max 3 short lines) cites requirement IDs.
-- End commit messages with: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`
+- No `Co-Authored-By` trailer or any other AI attribution in commit messages (user
+  instruction, 2026-10-14; older commits keep theirs, history is not rewritten).
 
 ## Verification protocol (every phase)
 
