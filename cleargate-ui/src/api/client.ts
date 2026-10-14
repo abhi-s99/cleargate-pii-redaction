@@ -1,6 +1,7 @@
 // API Client with strict runtime contract validation and error handling
 import {
   HealthSchema,
+  WhoAmISchema,
   BatchCreateResponseSchema,
   JobDetailSchema,
   FindingSchema,
@@ -9,6 +10,7 @@ import {
   ReportJsonSchema,
   ErrorResponseSchema,
   HealthResponse,
+  WhoAmIResponse,
   BatchCreateResponse,
   JobDetail,
   Finding,
@@ -124,6 +126,15 @@ export const api = {
   // GET /health
   async getHealth(): Promise<HealthResponse> {
     return request<HealthResponse>('/health', { method: 'GET' }, HealthSchema);
+  },
+
+  // GET /whoami: verify a token before storing it; the server decides the role
+  async whoami(token: string): Promise<WhoAmIResponse> {
+    return request<WhoAmIResponse>(
+      '/whoami',
+      { method: 'GET', headers: { Authorization: `Bearer ${token}` } },
+      WhoAmISchema
+    );
   },
 
   // POST /batches

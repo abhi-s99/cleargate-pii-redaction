@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../app/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useHealthQuery } from '../api/queries';
+import { api, ApiError } from '../api/client';
 import { HealthCard } from '../components/HealthCard';
 import { UserRole } from '../domain/states';
 import { KeyRound, Shield, UserCheck, ArrowRight } from 'lucide-react';
@@ -16,18 +17,34 @@ export const ConnectPage: React.FC = () => {
   const [persistInTab, setPersistInTab] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!inputToken.trim()) {
+    const token = inputToken.trim();
+    if (!token) {
       setErrorMessage('Please enter an authentication bearer token.');
       return;
     }
 
-    // Connect user and persist in memory (and session storage if checked)
-    login(inputToken.trim(), selectedRole, persistInTab);
-    navigate('/');
+    // The server decides the role of a token (ADR-35); the selection above is only a hint.
+    setIsVerifying(true);
+    try {
+      const me = await api.whoami(token);
+      if (me.role !== selectedRole) setSelectedRole(me.role);
+      login(token, me.role, persistInTab);
+      navigate('/');
+    } catch (err) {
+      setErrorMessage(
+        err instanceof ApiError && err.status === 401
+          ? 'This token was not accepted. Copy it again from .env (no spaces).'
+          : 'Could not verify the token with the server.'
+      );
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   return (
@@ -150,7 +167,8 @@ export const ConnectPage: React.FC = () => {
 
           <button
             type="submit"
-            className="w-full bg-accent hover:bg-accent-hover text-text-on-accent font-semibold py-2.5 px-4 rounded-md transition-colors shadow flex items-center justify-center gap-2"
+            disabled={isVerifying}
+            className="w-full disabled:opacity-60 bg-accent hover:bg-accent-hover text-text-on-accent font-semibold py-2.5 px-4 rounded-md transition-colors shadow flex items-center justify-center gap-2"
           >
             <span>Connect & Authorize</span>
             <ArrowRight className="w-4 h-4" />

@@ -29,7 +29,7 @@ import {
 export const ReviewPage: React.FC = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
-  const { role } = useAuth();
+  const { role, isAuthenticated } = useAuth();
 
   const {
     data: reviewItems = [],
@@ -240,9 +240,11 @@ export const ReviewPage: React.FC = () => {
 
   // Handle reviewer role restriction per Section 4 & Section 5
   if (role !== 'reviewer' || reviewError) {
-    const errorMsg = reviewError
-      ? reviewError.message
-      : 'This token is not a reviewer token.';
+    const errorMsg = !isAuthenticated
+      ? 'Not connected. The token is forgotten on page reload unless "Keep token for this browser tab" was ticked; connect again with the reviewer token.'
+      : reviewError
+        ? reviewError.message
+        : 'This token is not a reviewer token.';
 
     return (
       <div className="max-w-container mx-auto px-4 sm:px-6 py-12 flex-1">

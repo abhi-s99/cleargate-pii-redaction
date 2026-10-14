@@ -118,6 +118,13 @@ def test_tokens_and_roles(client: TestClient, jobs: dict[str, Any]) -> None:
     assert r.json()["error"]["code"] == "FORBIDDEN_REVIEWER_REQUIRED"
 
 
+def test_whoami_reports_the_role_of_the_token(client: TestClient) -> None:
+    assert client.get("/api/v1/whoami", headers=auth(REV)).json() == {"role": "reviewer"}
+    assert client.get("/api/v1/whoami", headers=auth(SUB)).json() == {"role": "submitter"}
+    assert client.get("/api/v1/whoami", headers=auth("wrong")).status_code == 401
+    assert client.get("/api/v1/whoami").status_code == 401
+
+
 def test_invalid_upload_fails_with_its_code(jobs: dict[str, Any]) -> None:
     job = jobs["final"]["wrong.pdf"]
     assert (job["state"], job["deciding_rule"], job["reason"]) == (

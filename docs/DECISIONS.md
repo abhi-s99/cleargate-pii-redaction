@@ -432,3 +432,19 @@ context, decision, alternatives and consequences.
 - **Consequences:** DOCX/PPTX image OCR runs in the service process and is bounded only by
   the container limit. The image uses Debian's Tesseract (5.3), not 5.4 as on the
   development machine, so OCR output can differ slightly.
+
+### ADR-35: The server reports the role of a token (`GET /whoami`)
+- **Context:** The supplied UI stored the role the user *selected* on the Connect page and
+  gated the review page on it in the browser. A reviewer token entered under "Submitter",
+  or a page reload without the tab-only token, made the UI show "This token is not a
+  reviewer token" without asking the server (seen in manual testing). TRD 10 has no
+  endpoint that reports a token's role.
+- **Decision:** Add `GET /api/v1/whoami` (any valid token; returns `{"role": ...}`, 401
+  otherwise). The Connect page verifies the token with it before storing anything and
+  stores the server's role; a rejected token is reported on the Connect page. The review
+  page says "Not connected" when no token is held. Server-side enforcement is unchanged:
+  reviewer endpoints still return 403 to a submitter token.
+- **Alternatives:** keep the client-side choice (the observed confusion); infer the role
+  from a 403 on the review endpoint (works only after the user is already on that page).
+- **Consequences:** One endpoint beyond TRD 10. The role buttons on the Connect page are a
+  hint only.

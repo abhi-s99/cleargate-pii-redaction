@@ -1,10 +1,12 @@
-"""GET /health: liveness, model loaded, Tesseract version, keys present (TRD 10)."""
+"""GET /health (liveness, model loaded, Tesseract version, keys present, TRD 10); GET /whoami."""
 
 from __future__ import annotations
 
 from typing import Any
 
 from fastapi import APIRouter, Request
+
+from cleargate.api.auth import PrincipalDep
 
 router = APIRouter()
 
@@ -32,3 +34,9 @@ def health(request: Request) -> dict[str, Any]:
             "llm_enabled": request.app.state.policy.llm.enabled,
         }
     )
+
+
+@router.get("/whoami")
+def whoami(p: PrincipalDep) -> dict[str, str]:
+    """The role of the presented token, so the UI never guesses it (ADR-35)."""
+    return {"role": p.role}

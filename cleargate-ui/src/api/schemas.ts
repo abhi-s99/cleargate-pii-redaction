@@ -20,6 +20,13 @@ export const HealthSchema = z.object({
 
 export type HealthResponse = z.infer<typeof HealthSchema>;
 
+// GET /whoami: the role the server assigns to the presented token (ADR-35).
+export const WhoAmISchema = z.object({
+  role: z.enum(['submitter', 'reviewer']),
+});
+
+export type WhoAmIResponse = z.infer<typeof WhoAmISchema>;
+
 export const JobStateSchema = z.enum([
   'RECEIVED',
   'PROCESSING',

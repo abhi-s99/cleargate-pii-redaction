@@ -31,6 +31,18 @@ export const handlers = [
     });
   }),
 
+  // GET /api/v1/whoami
+  http.get('*/api/v1/whoami', ({ request }) => {
+    const { authorized, role } = checkAuth(request);
+    if (!authorized) {
+      return HttpResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Bearer token is missing or invalid.' } },
+        { status: 401 }
+      );
+    }
+    return HttpResponse.json({ role });
+  }),
+
   // POST /api/v1/batches
   http.post('*/api/v1/batches', async ({ request }) => {
     const { authorized } = checkAuth(request);
