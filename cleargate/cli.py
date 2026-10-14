@@ -3,6 +3,7 @@
     cleargate process FILE... [--policy P] [--data-dir D] [--json]
     cleargate status ID            (a batch id or a job id)
     cleargate extract FILE --dump [--show-text]
+    cleargate serve [--host H] [--port P]      (API + the built web UI, Phase 8)
 
 Output carries ids, states, rules, counts and timings. Document text is printed
 only by ``extract --show-text``, which is meant for local debugging.
@@ -190,6 +191,26 @@ def extract(
     if dump_flag:
         typer.echo(dump(doc, show_text))
         typer.echo(f"timings: {json.dumps(ctx.timings)}")
+
+
+@app.command()
+def serve(
+    host: Annotated[str, typer.Option(help="bind address")] = "127.0.0.1",
+    port: Annotated[int, typer.Option(help="port")] = 8000,
+    data_dir: DataDirOpt = None,
+) -> None:
+    """Run the API (and the web UI when cleargate-ui/dist exists)."""
+    import uvicorn
+
+    from cleargate.api.main import create_app
+
+    configure_logging()
+    try:
+        api = create_app(_settings(data_dir))
+    except ClearGateError as exc:
+        _die(exc)
+    typer.echo(f"ClearGate on http://{host}:{port} (API under /api/v1)")
+    uvicorn.run(api, host=host, port=port, log_level="warning")
 
 
 def main() -> None:  # pragma: no cover

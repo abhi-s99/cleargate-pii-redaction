@@ -12,7 +12,7 @@ else
 endif
 PY := $(VENV_BIN)/python
 
-.PHONY: setup keys doctor lint format test test-all smoke eval run check clean gate-demo
+.PHONY: setup keys doctor lint format test test-all smoke eval run ui e2e check clean gate-demo
 
 setup:
 	test -x $(PY) || $(BOOTSTRAP_PY) -m venv .venv
@@ -49,8 +49,15 @@ smoke:
 eval:
 	$(PY) -m eval.run_eval
 
+ui:
+	cd cleargate-ui && npm ci && npm run build
+
 run:
-	@echo "make run: API and UI arrive in Phases 8 and 9" && exit 1
+	test -f cleargate-ui/dist/index.html || $(MAKE) ui
+	$(PY) -m cleargate.cli serve
+
+e2e:
+	$(PY) -m pytest -m e2e tests/e2e -q
 
 check: lint test
 	$(PY) scripts/check_matrix.py

@@ -351,6 +351,52 @@ class MetaStore:
         ).fetchone()
         return str(row[0]) if row else None
 
+    def batch_jobs(self, batch_id: str) -> list[sqlite3.Row]:
+        return list(
+            self.conn.execute(
+                "SELECT * FROM jobs WHERE batch_id = ? ORDER BY created_at, job_id", (batch_id,)
+            )
+        )
+
+    def batches_before(self, cutoff_iso: str) -> list[str]:
+        """Batch ids created before ``cutoff_iso`` (TTL sweeper, TR-SEC-06)."""
+        return [
+            str(r[0])
+            for r in self.conn.execute(
+                "SELECT batch_id FROM batches WHERE created_at < ?", (cutoff_iso,)
+            )
+        ]
+
+    def log_review(
+        self,
+        job_id: str,
+        finding_id: str | None,
+        reviewer_id: str,
+        action: str,
+        justification: str | None,
+    ) -> None:
+        """TR-RV-04: one row per decision; callers pass justifications already screened."""
+        with self.transaction():
+            self.conn.execute(
+                "INSERT INTO review_log (job_id, finding_id, reviewer_id, action, justification,"
+                " created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                (job_id, finding_id, reviewer_id, action, justification, self.now()),
+            )
+
+    def review_log(self, job_id: str) -> list[sqlite3.Row]:
+        return list(
+            self.conn.execute(
+                "SELECT * FROM review_log WHERE job_id = ? ORDER BY review_id", (job_id,)
+            )
+        )
+
+    def save_report(self, job_id: str, fmt: str, sha256: str, body: str) -> None:
+        with self.transaction():
+            self.conn.execute(
+                "INSERT OR REPLACE INTO reports VALUES (?, ?, ?, ?, ?)",
+                (job_id, fmt, sha256, body, self.now()),
+            )
+
     def delete_batch(self, batch_id: str) -> None:
         """TR-SEC-06: jobs, findings, handles, reports cascade; then their history."""
         with self.transaction():

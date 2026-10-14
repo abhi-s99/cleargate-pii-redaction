@@ -67,6 +67,13 @@ def job_dir(data_dir: Path, job_id: str) -> Path:
     return path
 
 
+def existing_job_dir(data_dir: Path, job_id: str) -> Path:
+    """Path of a job directory created earlier (never creates; id validated)."""
+    if not _JOB_ID.match(job_id):
+        raise ClearGateError(ErrorCode.INTERNAL, stage="job_id")
+    return data_dir / "jobs" / job_id
+
+
 def store_upload(src: Path, dest_dir: Path, ext: str) -> Path:
     """Copy ``src`` into ``dest_dir/original<ext>``; refuses to overwrite."""
     if not re.fullmatch(r"\.[a-z0-9]{1,8}", ext):

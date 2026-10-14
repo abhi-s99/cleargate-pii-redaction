@@ -47,6 +47,7 @@ dev = [
     "types-PyYAML==6.0.12.20260906",
     "pre-commit==4.7.0",
     "detect-secrets==1.5.0",
+    "playwright==1.55.0",
 ]
 
 [project.scripts]
@@ -65,6 +66,7 @@ addopts = "-ra --strict-markers --disable-socket"
 markers = [
     "samples: needs the confidential sample files (skipped when absent)",
     "slow: long-running (OCR, full pipeline)",
+    "e2e: browser smoke test of the web UI (needs the UI build and Microsoft Edge)",
 ]
 xfail_strict = true
 # Blocked sockets still raise SocketBlockedError; the extra UserWarning is noise.

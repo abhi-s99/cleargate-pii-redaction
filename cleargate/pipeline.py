@@ -54,7 +54,7 @@ from cleargate.core.models import (
 from cleargate.core.states import JobState
 from cleargate.gate.machine import decide, fail, transition
 from cleargate.gate.rules import GateInput, Verdict
-from cleargate.ingest.storage import job_dir, sanitize_display_name, store_upload
+from cleargate.ingest.storage import existing_job_dir, job_dir, sanitize_display_name, store_upload
 from cleargate.ingest.validator import ValidatedFile, file_ext, validate
 
 log = get_logger(__name__)
@@ -445,11 +445,13 @@ class Pipeline:
         self.run_batch([prepared])
         return self._result(prepared.ctx, prepared.name)
 
-    def context(self, job_id: str, batch_id: str) -> JobContext:
+    def context(self, job_id: str, batch_id: str, *, create: bool = True) -> JobContext:
+        """Context of a new job (creates its directory) or of an existing one."""
+        jdir = (job_dir if create else existing_job_dir)(self.settings.data_dir, job_id)
         return JobContext(
             job_id=job_id,
             batch_id=batch_id,
-            job_dir=job_dir(self.settings.data_dir, job_id),
+            job_dir=jdir,
             policy=self.policy,
             policy_hash=self.policy_hash,
             settings=self.settings,
