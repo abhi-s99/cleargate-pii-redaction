@@ -6,6 +6,15 @@ phase tags (`v0.NN.0`).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-10-14: Phase 11, hardening, Docker, demo
+### Added
+- `RLIMIT_AS` for OCR workers (`CLEARGATE_WORKER_MEM_MB`, default 6144) and a spawned
+  OCR pool (ADR-34); Dockerfile and `docker-compose.yml`; `docs/DEMO.md`; performance
+  tests for TR-PF-01 and TR-PF-04.
+### Fixed
+- README quickstart named Streamlit and commands that do not exist; a policy option
+  that does not exist was listed as available.
+
 ## [0.10.0] - 2026-10-14: Phase 10, evaluation harness
 ### Added
 - `make eval`: metrics of TRD 9 with Wilson intervals, synthetic report `eval/report.md`,

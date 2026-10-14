@@ -5,7 +5,7 @@ ClearGate extracts text from PDFs (including scans), Word and PowerPoint files, 
 
 Built for the **Optiv Consulting case study PS-2: Text Analysis and PII Detection** (client scenario: Cadence Financial Group).
 
-> **Status: Phase 10 complete.** Detection, redaction, independent verification, the API and the React web UI work end to end; run `make ui` then `make run` and open http://127.0.0.1:8000 (tokens are in `.env`). The [status table](#status) is the source of truth. Progress: [docs/PROGRESS.md](docs/PROGRESS.md); test traceability: [docs/VERIFICATION.md](docs/VERIFICATION.md).
+> **Status: Phase 11 complete.** Detection, redaction, independent verification, the API and the React web UI work end to end; run `make ui` then `make run` and open http://127.0.0.1:8000 (tokens are in `.env`). The [status table](#status) is the source of truth. Progress: [docs/PROGRESS.md](docs/PROGRESS.md); test traceability: [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
 [PRD](docs/PRD.md) · [Architecture & technical decisions](docs/Architecture.md) · [TRD](docs/TRD.md)
 
@@ -76,6 +76,7 @@ Sanitized: [PERSON_1] from Finance can be contacted at [EMAIL_1].
 | Review queue + React web UI (replaces Streamlit, ADR-32) | Yes | Yes | Yes ([Phase 9](docs/phases/PHASE-09-ui.md)) |
 | Reports + audit trail | Yes | Yes | Yes ([Phase 8](docs/phases/PHASE-08-api.md)) |
 | Evaluation harness + calibration (synthetic gold; real-sample gold set from annotators pending, ADR-33) | Yes | Yes | Partial ([Phase 10](docs/phases/PHASE-10-eval.md), [eval/report.md](eval/report.md)) |
+| Hardening (OCR worker memory limit), Docker image + compose, demo script | Yes | Yes | Yes ([Phase 11](docs/phases/PHASE-11-hardening.md)) |
 | `REFERENCE_GAP_ANALYSIS.md` | partial (summary in Architecture §3) | No | No |
 | XLSX, legacy `.doc/.ppt` | stretch | No | No |
 
@@ -103,23 +104,32 @@ pip install -e ".[dev]"
 python -m spacy download en_core_web_lg
 tesseract --version                                        # expect 5.x
 
-# 2. Secrets (never commit)
-export CLEARGATE_VAULT_KEY=$(python -c "from cryptography.fernet import Fernet;print(Fernet.generate_key().decode())")
-export CLEARGATE_GATE_KEY=$(python -c "import secrets;print(secrets.token_urlsafe(32))")
-export CLEARGATE_SUBMITTER_TOKEN=... CLEARGATE_REVIEWER_TOKEN=...
+# 2. Secrets (never commit): writes .env with the vault key, gate key and both tokens
+python scripts/genkeys.py .env
 
-# 3. Run
-uvicorn cleargate.api.main:app --port 8000          # API + background workers
-streamlit run cleargate/ui/app.py                   # UI on :8501
-# or: docker compose up
+# 3. Run: API + React UI on http://127.0.0.1:8000 (needs Node 18+ for the UI build)
+make ui && make run
 ```
+
+### Docker
+
+```bash
+python scripts/genkeys.py .env        # once; compose reads the keys from .env
+docker compose up -d --build          # first build about 10 minutes (spaCy model, UI)
+# open http://127.0.0.1:8000 ; CLEARGATE_PORT=8765 docker compose up -d picks another host port
+docker compose down                   # keep the data volume; add -v to delete it
+```
+
+The image runs as a non-root user with a read-only root file system, publishes on
+loopback only, and applies the OCR worker memory limit (ADR-34).
 
 ### CLI
 
 ```bash
-cleargate process samples/*.pptx samples/*.docx samples/*.pdf --policy config/policy.default.yaml --out out/
+cleargate process samples/*.pptx samples/*.docx samples/*.pdf --policy config/policy.default.yaml
 cleargate status <batch_id>
-cleargate eval --gold eval/gold --out eval/report.md
+cleargate serve --port 8000
+python -m eval.run_eval               # evaluation report (make eval)
 ```
 
 ### API
@@ -203,10 +213,11 @@ Key tests include: **OCR disabled → scanned PDF must end `BLOCKED`**; a forced
 - **No scanner proves zero PII.** ClearGate combines detection, verification, coverage and human review, and reports measured leak rate and recall. It does not claim a guarantee.
 - **The evaluation set is tiny** (three real documents plus synthetic fixtures). Reported numbers come with intervals and are not generalisable.
 - **OCR has a ceiling.** Illegible regions are masked and sent to review, so some context is lost.
-- **Quasi-identifiers stay by default.** Role titles and organisation context are kept for the AI and can still single someone out (e.g., "Group CRO"). `role_title_policy: generalize` is available.
+- **Quasi-identifiers stay by default.** Role titles and organisation context are kept for the AI and can still single someone out (e.g., "Group CRO"). The policy switch `keep.role_titles` is read but not acted on yet: generalising titles is future work.
 - **Organisation and client names are not redacted** (not PII under PS-2). Logo/client-name anonymisation is future work.
 - **Scanned-PDF processing is slow on small machines.** OCR measured at ~14 s/page on 2 vCPU, and verification re-OCRs the output.
 - **Prototype security:** static bearer tokens, single tenant, SQLite metadata (no raw PII), OS-permission protection for uploads, and a mock AI client by default. Not production-grade access control or encryption at rest.
+- **Worker memory limit is POSIX only.** `RLIMIT_AS` (`CLEARGATE_WORKER_MEM_MB`, default 6144 MiB of virtual address space) applies to OCR workers on Linux and in the Docker image; on Windows it is a no-op (ADR-34).
 - **English-only NER.** Non-Latin names and non-English documents are untested.
 
 ## Confidentiality

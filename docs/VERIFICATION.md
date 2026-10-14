@@ -12,7 +12,7 @@ Status values:
 - **XFAIL**: a known limitation, kept as a strict `xfail` test with a reason.
 - **TODO**: not implemented yet (target phase shown).
 
-Last updated: Phase 10 (14 Oct 2026).
+Last updated: Phase 11 (14 Oct 2026).
 
 | ID | Requirement | Phase | Tests | Status |
 |---|---|---|---|---|
@@ -81,10 +81,10 @@ Last updated: Phase 10 (14 Oct 2026).
 | TR-IN-04 | PNG/JPEG/TIFF detection | 2 | `tests/unit/test_validator.py::test_valid_files_are_accepted`<br>`tests/unit/test_validator.py::test_truncated_png`<br>`tests/unit/test_validator.py::test_image_too_large` | PASS |
 | TR-IN-05 | XLSX (MAY): detected and rejected as unsupported; extraction is stretch | stretch | `tests/unit/test_validator.py::test_xlsx_is_not_supported_yet` | PARTIAL |
 | TR-IN-06 | Reject legacy, macro, encrypted | 2 | `tests/unit/test_validator.py::test_unsupported_extensions`<br>`tests/unit/test_validator.py::test_legacy_ole_file_disguised_as_docx`<br>`tests/unit/test_validator.py::test_encrypted_pdf`<br>`tests/unit/test_validator.py::test_encrypted_ooxml_package`<br>`tests/unit/test_validator.py::test_macro_content_type_behind_docx_extension`<br>`tests/unit/test_validator.py::test_vba_project_part` | PASS |
-| TR-PF-01 | DOCX/PPTX without images <= 15 s | 11 | - | TODO |
-| TR-PF-02 | DOCX with screenshots <= 3 min | 11 | - | TODO |
-| TR-PF-03 | Scanned PDF <= 20 s/page | 11 | - | TODO |
-| TR-PF-04 | Progress at least every 5 s | 9 | - | TODO |
+| TR-PF-01 | DOCX/PPTX without images <= 15 s (warm worker, invented 60-paragraph DOCX and 12-slide PPTX) | 11 | `tests/integration/test_performance.py::test_office_file_without_images_within_15_s` | PASS |
+| TR-PF-02 | DOCX with screenshots <= 3 min (measured by `make smoke`: 199 s on 12 CPUs, target missed; no automated test yet) | 11 | - | TODO |
+| TR-PF-03 | Scanned PDF <= 20 s/page (measured by `make smoke`: 6.1 s/page end to end on 12 CPUs; no automated test yet) | 11 | - | TODO |
+| TR-PF-04 | Progress at least every 5 s (per OCR page, measured gap < 5 s) | 9, 11 | `tests/integration/test_performance.py::test_ocr_progress_is_reported_per_page_within_5_s` | PASS |
 | TR-PF-05 | spaCy loaded once per process, shared by NER and the word list | 5 | `tests/unit/test_detect_context.py::test_spacy_model_loaded_once_per_process` | PASS |
 | TR-RD-01 | Batch-scoped typed tokens | 6 | `tests/unit/test_redact_units.py::test_tokens_are_batch_scoped_typed_and_consistent`<br>`tests/unit/test_redact_units.py::test_token_styles`<br>`tests/unit/test_redact_units.py::test_batch_delete_removes_vault_rows` | PASS |
 | TR-RD-02 | Fernet vault, refuse start without key (key presence/format check only) | 0, 6 | `tests/unit/test_config.py::test_vault_key_validation` | PARTIAL |
@@ -104,9 +104,9 @@ Last updated: Phase 10 (14 Oct 2026).
 | TR-SEC-04 | Restricted job dirs (0700 / Windows ACL, ADR-25), O_EXCL, safe filenames | 2 | `tests/unit/test_storage.py::test_job_dir_is_created_once_and_restricted`<br>`tests/unit/test_storage.py::test_upload_is_stored_as_original_with_o_excl`<br>`tests/unit/test_storage.py::test_display_names_are_sanitised`<br>`tests/integration/test_pipeline.py::test_upload_is_stored_under_job_dir_as_original` | PASS |
 | TR-SEC-05 | Server-side state enforcement on artifacts | 8 | `tests/integration/test_api.py::test_non_safe_job_refuses_outputs`<br>`tests/integration/test_api.py::test_tokens_and_roles` | PASS |
 | TR-SEC-06 | TTL sweeper and batch delete (store-level delete done; sweeper and endpoint in Phase 8) | 1, 8 | `tests/unit/test_db.py::test_delete_batch_removes_jobs_history_and_findings` | PARTIAL |
-| TR-SEC-07 | Parser hardening (DTD/XXE, zip bomb, page and image limits done; OCR timeout and XML parts done; RLIMIT_AS Phase 11) | 2, 3, 11 | `tests/unit/test_validator.py::test_xxe_in_content_types_is_rejected`<br>`tests/unit/test_validator.py::test_billion_laughs_is_rejected`<br>`tests/unit/test_validator.py::test_zip_bomb_by_ratio`<br>`tests/unit/test_validator.py::test_too_many_pages`<br>`tests/integration/test_extract_failclosed.py::test_ocr_timeout_marks_page_uninspected`<br>`tests/integration/test_extract_failclosed.py::test_xxe_in_a_referenced_part_is_uninspected_and_blocks` | PARTIAL |
+| TR-SEC-07 | Parser hardening (DTD/XXE, zip bomb, page and image limits done; OCR timeout and XML parts done; RLIMIT_AS on POSIX OCR workers, ADR-34; the POSIX test runs in the Docker image, a no-op on Windows) | 2, 3, 11 | `tests/unit/test_validator.py::test_xxe_in_content_types_is_rejected`<br>`tests/unit/test_validator.py::test_billion_laughs_is_rejected`<br>`tests/unit/test_validator.py::test_zip_bomb_by_ratio`<br>`tests/unit/test_validator.py::test_too_many_pages`<br>`tests/integration/test_extract_failclosed.py::test_ocr_timeout_marks_page_uninspected`<br>`tests/integration/test_extract_failclosed.py::test_xxe_in_a_referenced_part_is_uninspected_and_blocks` <br>`tests/unit/test_limits.py::test_allocation_beyond_the_limit_fails_in_the_worker`<br>`tests/unit/test_limits.py::test_windows_is_a_documented_no_op`<br>`tests/integration/test_extract_failclosed.py::test_ocr_worker_pool_matches_in_process_ocr` | PASS |
 | TR-SEC-08 | No original XObjects or thumbnails in output | 6 | `tests/integration/test_redact_fixtures.py::test_scanned_output_has_no_original_image_objects`<br>`tests/integration/test_redact_fixtures.py::test_ooxml_parts_rels_and_metadata`<br>`tests/integration/test_redact_fixtures.py::test_image_output_has_no_exif` | PASS |
-| TR-SEC-09 | Documented prototype limits | 11 | - | TODO |
+| TR-SEC-09 | Documented prototype limits | 11 | `tests/unit/test_docs.py::test_readme_lists_every_prototype_limit` | PASS |
 | V1 | Output reopens via two parsers | 7 | `tests/integration/test_redact_fixtures.py::test_outputs_reopen_in_two_parsers_with_unchanged_counts`<br>`tests/integration/test_verify_faults.py::test_output_that_does_not_reopen_fails_g0` | PASS |
 | V2 | Known-value leak check | 7 | `tests/unit/test_redact_units.py::test_needles_and_boundaries`<br>`tests/integration/test_verify_faults.py::test_value_left_in_the_output_is_blocked_g1` | PASS |
 | V3 | Residual scan | 7 | `tests/integration/test_verify_faults.py::test_new_identifier_planted_in_output_only_is_blocked_g2` | PASS |

@@ -402,3 +402,33 @@ context, decision, alternatives and consequences.
 - **Consequences:** `review_threshold` stays 0.40 until real gold exists, so the real-sample
   review load is not yet calibrated. Synthetic numbers are a regression signal, not an
   accuracy estimate; the report says so.
+
+### ADR-34: Worker memory limit and the Docker image
+- **Context:** TR-SEC-07 asks for a worker memory limit (`RLIMIT_AS`); ADR-16 and ADR-25
+  deferred it to the Linux image because Windows has no `resource` module. PRD 8 asks for
+  `docker compose up` on a laptop.
+- **Decision:**
+  1. `cleargate.core.limits.limit_memory(mb)` sets `RLIMIT_AS` and is the initializer of
+     the PDF OCR process pool; Tesseract children inherit it. `CLEARGATE_WORKER_MEM_MB`
+     (default 6144, 0 = off). `RLIMIT_AS` caps virtual size: a fresh worker reserves
+     about 3.7 GB after one page (OpenCV and ONNX thread arenas) while only about 0.5 GB is
+     resident; in the image 3072 MiB broke OCR, 4096 MiB worked, and an 8 GiB allocation was
+     refused under every limit tried. The pool uses the `spawn` start method on every platform: a
+     forked worker inherits the service's address space (measured 4.4 GB with spaCy
+     loaded) and would start above the limit. Where the limit is enforceable (POSIX), OCR always runs in
+     worker processes, never in the service process. A worker killed by the limit breaks
+     the pool, and the job ends `FAILED` (fail closed). On Windows it is a documented
+     no-op.
+  2. The image is two-stage: Node builds the UI in live mode; `python:3.13-slim` with
+     Tesseract (Debian package) and the pinned spaCy model wheel runs `cleargate serve` as
+     a non-root user. The source is installed editable under `/app` because `REPO_ROOT`
+     locates `config/` and `cleargate-ui/dist` relative to the package.
+  3. Compose publishes on loopback only, mounts `/data` as a volume, reads keys from
+     `.env`, sets a container memory limit, a read-only root file system, `cap_drop: ALL`
+     and `no-new-privileges`. `.dockerignore` keeps `Data/`, `samples/`, `eval/gold/`,
+     `out/`, `.env` and databases out of the build context.
+- **Alternatives:** Windows Job Objects for the limit (more code for a dev platform);
+  a non-editable wheel install (would need `REPO_ROOT` to become configurable).
+- **Consequences:** DOCX/PPTX image OCR runs in the service process and is bounded only by
+  the container limit. The image uses Debian's Tesseract (5.3), not 5.4 as on the
+  development machine, so OCR output can differ slightly.
