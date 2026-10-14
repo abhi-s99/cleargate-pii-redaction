@@ -6,6 +6,26 @@ phase tags (`v0.NN.0`).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-14: Phase 9, React web UI integrated
+### Added
+- The React UI in `cleargate-ui/` talks to the real API (ADR-32); `make ui`, `make run`,
+  `make e2e`; Edge-driven browser smoke test.
+
+## [0.8.0] - 2026-10-14: Phase 8, API
+### Added
+- FastAPI service: batches, jobs, findings, value-grouped review with re-verification,
+  reports, SafeHandle-checked downloads, MockAgent handoff, batch delete, TTL sweeper
+  (ADR-31); `cleargate serve`.
+
+## [0.7.0] - 2026-10-14: Phase 7, independent verification
+### Added
+- V1..V6 on a separate re-extraction path, repair pass for raster hits (ADR-30).
+
+## [0.6.0] - 2026-10-14: Phase 6, redaction
+### Added
+- Tokens and Fernet vault, DOCX/PPTX/PDF/image writers, sanitized text, batch pipeline with
+  encrypted job state (ADR-29).
+
 ## [0.5.0] - 2026-10-14: Phase 5, context-aware detection
 
 ### Added

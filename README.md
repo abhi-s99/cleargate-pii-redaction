@@ -5,7 +5,7 @@ ClearGate extracts text from PDFs (including scans), Word and PowerPoint files, 
 
 Built for the **Optiv Consulting case study PS-2: Text Analysis and PII Detection** (client scenario: Cadence Financial Group).
 
-> **Status: Phase 3 (extraction) complete.** Validation, PDF/DOCX/PPTX/image extraction with OCR, face and unreadable-region detection, the pipeline, the CLI and the privacy gate exist and are tested on synthetic fixtures and the real samples. Detection, redaction and verification are not built yet, so every file still ends `BLOCKED`. The [status table](#status) is the source of truth for what exists, and nothing here should be read as "it works" until that table says *Verified*. The commands under [Quick start](#quick-start-planned) are the target interface. Progress: [docs/PROGRESS.md](docs/PROGRESS.md); test traceability: [docs/VERIFICATION.md](docs/VERIFICATION.md).
+> **Status: Phase 9 complete.** Detection, redaction, independent verification, the API and the React web UI work end to end; run `make ui` then `make run` and open http://127.0.0.1:8000 (tokens are in `.env`). The [status table](#status) is the source of truth. Progress: [docs/PROGRESS.md](docs/PROGRESS.md); test traceability: [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
 [PRD](docs/PRD.md) · [Architecture & technical decisions](docs/Architecture.md) · [TRD](docs/TRD.md)
 
@@ -68,13 +68,13 @@ Sanitized: [PERSON_1] from Finance can be contacted at [EMAIL_1].
 | File validation & batch ingestion (CLI) | Yes | Yes | Yes ([Phase 2](docs/phases/PHASE-02-skeleton.md)) |
 | Canonical Document Model + PDF/DOCX/PPTX/image extractors with OCR, faces, regions | Yes | Yes | Yes ([Phase 3](docs/phases/PHASE-03-extract.md)) |
 | Layered detection (L1–L5) + allowlist + evidence tiers | Yes | Yes | Yes ([Phase 4](docs/phases/PHASE-04-detect-rules.md), [Phase 5](docs/phases/PHASE-05-detect-context.md)) |
-| Token redaction + encrypted vault | Yes | No | No |
-| Format-native writers (scanned PDF, native PDF, DOCX, PPTX, images) | Yes | No | No |
-| Independent verification (V1–V6) | Yes | No | No |
+| Token redaction + encrypted vault | Yes | Yes | Yes ([Phase 6](docs/phases/PHASE-06-redact.md)) |
+| Format-native writers (scanned PDF, native PDF, DOCX, PPTX, images) | Yes | Yes | Yes ([Phase 6](docs/phases/PHASE-06-redact.md)) |
+| Independent verification (V1–V6) | Yes | Yes | Yes ([Phase 7](docs/phases/PHASE-07-verify.md)) |
 | Privacy gate state machine + rules G0..G7 + SafeHandle | Yes | Yes | Yes ([Phase 1](docs/phases/PHASE-01-gate.md)) |
-| Mock AI handoff | Yes | No | No |
-| Review queue + Streamlit UI | Yes | No | No |
-| Reports + audit trail | Yes | No | No |
+| Mock AI handoff | Yes | Yes | Yes ([Phase 8](docs/phases/PHASE-08-api.md)) |
+| Review queue + React web UI (replaces Streamlit, ADR-32) | Yes | Yes | Yes ([Phase 9](docs/phases/PHASE-09-ui.md)) |
+| Reports + audit trail | Yes | Yes | Yes ([Phase 8](docs/phases/PHASE-08-api.md)) |
 | Evaluation harness + gold set | Yes | No | No |
 | `REFERENCE_GAP_ANALYSIS.md` | partial (summary in Architecture §3) | No | No |
 | XLSX, legacy `.doc/.ppt` | stretch | No | No |

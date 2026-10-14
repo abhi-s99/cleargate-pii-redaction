@@ -259,3 +259,119 @@ context, decision, alternatives and consequences.
   over-redact a value that also has a harmless use; review items are grouped by value so
   one reviewer decision covers all copies (Phase 8). Scores remain uncalibrated until
   Phase 10.
+
+### ADR-29: Redaction writers, batch pipeline and encrypted job state
+- **Context:** TRD 7 describes each writer, but leaves open how a finding's offsets reach the
+  exact XML nodes, what happens to package parts the extractors could not read, how a
+  review re-run gets the raw text back without storing it in clear, and how tokens can be
+  consistent across a batch when jobs run one after another.
+- **Decision:**
+  1. *Shared text maps* (`extract/textmap.py`): segment text is built from the same node
+     pieces (runs, fields, attribute values, stripped generic text nodes) the writer edits,
+     so offsets always map; a span crossing runs puts its token in the first run and
+     removes the covered text from the rest. A segment whose map does not reproduce its
+     text is never guessed: the action is unapplied (G4).
+  2. *OOXML extras*: every author-like attribute in every part becomes `[REDACTED]` (not
+     only `docProps`); a final value sweep replaces any remaining exact occurrence of a
+     redacted value in any paragraph, text node or attribute (`mc:Fallback` copies, chart
+     caches); short numbers are never swept. Unreferenced unreadable parts (`[trash]`
+     remnants, an XML part that failed to parse) and printer settings are removed and
+     reported as masked; the thumbnail is removed with its relationship and content-type
+     override; package infrastructure is never removed.
+  3. *Images*: redacted rasters keep their format, size and part name; EMF is rebuilt as a
+     minimal EMF holding the redacted bitmap with the original frame (Windows renders it
+     back); WMF cannot be rebuilt and stays unapplied. Region masks get 1.5 % padding.
+     `Segment.ocr_word_boxes` (geometry only) lets the writer burn exactly the span's words.
+  4. *PDF*: pages are routed with the extractor's rule; raster pages are re-rendered at the
+     OCR DPI, burned, and rebuilt as a single image; the invisible text layer (TR-RD-20
+     MAY) is not added. Annotations carrying findings are deleted and other annotation
+     authors cleared. PyMuPDF's constant is `PDF_REDACT_LINE_ART_REMOVE_IF_TOUCHED`.
+  5. *Batch pipeline*: `submit` (store + validate) then `run_batch`: extract all, detect over
+     the batch (one registry), then tokens, writer, verifier and gate per job. Tokens are
+     assigned in reading order, so numbering follows first occurrence.
+  6. *Encrypted job state*: segment texts and finding values a review re-run needs are
+     stored Fernet-encrypted (vault key) as `state.enc` in the job directory, deleted with
+     the job. This is part of the vault in the sense of TR-SEC-02; nothing raw reaches
+     `meta.db`. A `runs` table keeps the content-free verification report, action
+     summary, timings and stage versions.
+- **Alternatives:** re-run extraction and detection for review (TRD TR-RV-03 says detection
+  is not re-run); pickle the state (unsafe to load); keep WMF/EMF as is (an unmasked
+  screenshot would block the sample DOCX for good).
+- **Consequences:** Outputs keep page/slide/paragraph counts. A WMF picture with findings
+  blocks its document (G4); none is in the samples. Over-redaction is possible where a
+  redacted value also has a harmless use.
+
+### ADR-30: Verification interpretations and the repair pass
+- **Context:** Running V1..V6 on the real outputs showed three things the TRD does not
+  settle. OCR of a redacted raster is not OCR of the original: black boxes change page
+  segmentation, so text the source OCR misread can be read correctly in the output (a real
+  leak) and masked areas read as low-confidence noise. V3 "new" findings needed a
+  definition. Short numeric needles hit unrelated numbers.
+- **Decision:**
+  1. *V2 needles*: values and normal forms of every redacted finding; registry variants
+     only for registered (CORROBORATED or better) persons; one-word values matched with
+     their case; numbers under 6 digits only together with the word before them in the
+     source (`ending 4417`); digit runs compared with separators removed.
+  2. *V3 "new"*: a residual finding is new when no source finding has the same type and
+     value HMAC, so values the source pass already decided on are not re-litigated.
+     Non-deterministic new hits become review items; a reviewer can accept them (stored as
+     known) or confirm them (their output boxes are burned on every later run).
+  3. *Repair pass*: when V2 hits or new deterministic V3 hits are located in an output
+     raster's OCR, their word boxes are burned once and verification runs again from
+     scratch; the gate sees only the second report. Hits in text layers (XML, PDF text,
+     sanitized text) are never repaired and keep the gate at G1/G2.
+  4. *V4*: `OCR_UNREADABLE`/`OCR_NO_TEXT` on an output raster the writer burned masks into
+     is an effect of the masks (that raster was still OCR'd and searched by V2); OCR
+     unavailable or timeouts always count.
+  5. *V6*: SRS counts body structure only (annotation texts, link URIs, form values and
+     outline titles are not units); CRS is computed per rendered segment (LCS of non-PII
+     tokens against the sanitized segment).
+  6. Repair boxes assume `verify_ocr_dpi` equals `ocr.dpi` (both 300); Phase 11 measures
+     200 DPI and must scale boxes if the values differ.
+- **Alternatives:** treat every OCR difference as blocking (all scanned outputs blocked by
+  noise); skip OCR of outputs (misses pixel leaks entirely).
+- **Consequences:** On the samples the repair pass burned a few boxes on the PDF and one on
+  the DOCX; all three samples verify with 0 leak hits and reach `REVIEW_REQUIRED`.
+
+### ADR-31: API service layer, value-grouped review, loopback-only API tests
+- **Context:** TRD 10 lists the endpoints; it does not say how background work, review
+  grouping, null fields or the socket-blocked test rule interact with a real HTTP stack.
+- **Decision:**
+  1. One background worker thread runs batches and review re-runs in order (OCR keeps its
+     own process pool). Every request opens its own `meta.db` connection. Progress per job
+     is kept in memory and reported by `GET /jobs/{id}`.
+  2. Review items are grouped by `(type, value HMAC)`: one decision covers every linked copy
+     of a value (ADR-28 value propagation). Masked regions and residual V3 hits are review
+     items too (`kind`: finding, region, residual). Thumbnails are rendered from the
+     redacted output, so they show the proposed masks applied (TR-RV-01). An added region's
+     box is given in thumbnail pixels and scaled back to the raster.
+  3. `GET /jobs/{id}/findings` (masked previews only) is open to submitters, as the UI
+     expects; `include_text=true` needs the reviewer role. Rejection justifications are
+     screened: any finding value in them is replaced by `[withheld]` before logging.
+  4. Responses omit `null` fields (the UI's schemas reject `null` where a field is optional).
+  5. A review decision moves the job `REVIEW_REQUIRED -> PROCESSING` with rule `review`; a
+     document rejection moves it to `BLOCKED` with reason `REVIEWER_REJECTED`.
+  6. In-process API tests run with sockets limited to loopback (`allow_hosts`): asyncio's
+     event loop needs a loopback socket pair on Windows. A test proves outbound connections
+     stay blocked. The browser smoke test (opt-in `-m e2e`) binds a localhost server.
+- **Consequences:** The API is single-node and single-worker (PRD cut line: no Celery). A
+  large batch queues behind the previous one.
+
+### ADR-32: React + TypeScript web UI instead of Streamlit (user decision)
+- **Context:** ADR-12 chose Streamlit for one-language simplicity. The user supplied a
+  finished React 18 + TypeScript + Vite UI (`cleargate-ui/`, written against the TRD 10
+  contract with a mock server) and asked for it to be integrated instead.
+- **Decision:** Replace the Streamlit UI with the supplied React UI. ADR-12's principle is
+  kept: the UI is a thin client of the API with no gate logic; every rule is enforced
+  server-side (403/409/422). The production build (`VITE_API_MODE=live`) is served by
+  `cleargate serve` on the same origin; the Vite dev server proxies `/api/v1`. Integration
+  changes to the UI: the redacted download asks for the uploaded file's extension (it
+  always asked for `.docx`), the Connect page names the `.env` tokens, two em dashes were
+  removed (project style rule), and a "Confirm all remaining" button records confirm
+  decisions for undecided items (a convenience; the server still re-verifies). The UI's
+  own `docs/ADR-14-frontend.md` is this decision; its number predates ours.
+- **Alternatives:** keep Streamlit (the user asked otherwise); serve the UI separately with
+  CORS (two origins, more configuration for the manual test).
+- **Consequences:** Node 18+ is needed to build the UI (`make ui`). The brief's Playwright
+  exit criterion is met with Python Playwright driving the Edge installed with Windows
+  (no browser download); on other systems the e2e test is skipped.
