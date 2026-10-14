@@ -5,7 +5,7 @@ ClearGate extracts text from PDFs (including scans), Word and PowerPoint files, 
 
 Built for the **Optiv Consulting case study PS-2: Text Analysis and PII Detection** (client scenario: Cadence Financial Group).
 
-> **Status: Phase 9 complete.** Detection, redaction, independent verification, the API and the React web UI work end to end; run `make ui` then `make run` and open http://127.0.0.1:8000 (tokens are in `.env`). The [status table](#status) is the source of truth. Progress: [docs/PROGRESS.md](docs/PROGRESS.md); test traceability: [docs/VERIFICATION.md](docs/VERIFICATION.md).
+> **Status: Phase 10 complete.** Detection, redaction, independent verification, the API and the React web UI work end to end; run `make ui` then `make run` and open http://127.0.0.1:8000 (tokens are in `.env`). The [status table](#status) is the source of truth. Progress: [docs/PROGRESS.md](docs/PROGRESS.md); test traceability: [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
 [PRD](docs/PRD.md) · [Architecture & technical decisions](docs/Architecture.md) · [TRD](docs/TRD.md)
 
@@ -75,7 +75,7 @@ Sanitized: [PERSON_1] from Finance can be contacted at [EMAIL_1].
 | Mock AI handoff | Yes | Yes | Yes ([Phase 8](docs/phases/PHASE-08-api.md)) |
 | Review queue + React web UI (replaces Streamlit, ADR-32) | Yes | Yes | Yes ([Phase 9](docs/phases/PHASE-09-ui.md)) |
 | Reports + audit trail | Yes | Yes | Yes ([Phase 8](docs/phases/PHASE-08-api.md)) |
-| Evaluation harness + gold set | Yes | No | No |
+| Evaluation harness + calibration (synthetic gold; real-sample gold set from annotators pending, ADR-33) | Yes | Yes | Partial ([Phase 10](docs/phases/PHASE-10-eval.md), [eval/report.md](eval/report.md)) |
 | `REFERENCE_GAP_ANALYSIS.md` | partial (summary in Architecture §3) | No | No |
 | XLSX, legacy `.doc/.ppt` | stretch | No | No |
 
@@ -192,7 +192,8 @@ docs/        PRD.md · TRD.md · Architecture.md · DECISIONS.md · VERIFICATION
 
 ```bash
 pytest                       # unit + integration + security (socket-blocked, log-leak grep, fault injection)
-cleargate eval               # metrics vs PS-2 targets → eval/report.md
+make eval                    # metrics vs PS-2 targets on synthetic gold -> eval/report.md
+python -m eval.run_eval --samples   # real samples vs eval/gold/*.jsonl -> out/eval-samples.md
 ```
 
 Key tests include: **OCR disabled → scanned PDF must end `BLOCKED`**; a forced unapplied redaction must end `BLOCKED`; a tampered SafeHandle must be refused; no gold PII value may appear in any output part, log or report.

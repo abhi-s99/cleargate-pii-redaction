@@ -12,25 +12,25 @@ Status values:
 - **XFAIL**: a known limitation, kept as a strict `xfail` test with a reason.
 - **TODO**: not implemented yet (target phase shown).
 
-Last updated: Phase 5 (14 Oct 2026).
+Last updated: Phase 10 (14 Oct 2026).
 
 | ID | Requirement | Phase | Tests | Status |
 |---|---|---|---|---|
 | FR-01 | Ingestion and validation | 2 | `tests/integration/test_pipeline.py::test_invalid_input_ends_failed_with_specific_code`<br>`tests/unit/test_validator.py::test_samples_are_accepted` | PASS |
-| FR-02 | Batch workflow, background progress | 8 | - | TODO |
+| FR-02 | Batch workflow, background progress (API worker thread, UI polling) | 8, 9 | `tests/integration/test_api.py::test_safe_job_downloads_report_and_handoff`<br>`tests/integration/test_api.py::test_delete_batch`<br>`tests/e2e/test_ui_smoke.py::test_upload_review_download_handoff` | PASS |
 | FR-03 | Structure-aware extraction (extraction done; report listing OCR pages in Phase 8) | 3, 8 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator`<br>`tests/integration/test_extract_samples.py::test_docx_structure_matches_profile` | PARTIAL |
 | FR-04 | Source traceability (locators on every segment; report and review in Phase 8) | 3, 8 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator` | PARTIAL |
 | FR-05 | Layered detection: L1 validators, L2 labels, L3 NER, L4 context, L5 registry | 4, 5 | `tests/integration/test_detect_fixtures.py::test_planted_item_detected_with_type_and_redacted`<br>`tests/unit/test_recognizers.py::test_label_anchored_positives`<br>`tests/unit/test_detect_context.py::test_three_names_in_one_cell_give_three_person_findings` | PASS |
 | FR-06 | People vs business entities (allowlist suppresses NER-only terms; people in the same sentence redacted) | 5 | `tests/unit/test_detect_context.py::test_products_kept_while_people_in_same_sentence_are_redacted`<br>`tests/unit/test_detect_context.py::test_allowlist_term_that_is_a_registered_person_is_redacted`<br>`tests/integration/test_detect_fixtures.py::test_decoys_are_not_redacted` | PASS |
 | FR-07 | Evidence tiers, threshold-driven routing (calibration itself is Phase 10, ADR-28) | 5, 10 | `tests/unit/test_merge.py::test_threshold_changes_routing`<br>`tests/unit/test_merge.py::test_tiers` | PARTIAL |
-| FR-08 | Typed tokens, batch-consistent pseudonyms | 6 | - | TODO |
-| FR-09 | Secure redacted files, no overlays | 6 | - | TODO |
-| FR-10 | Independent verification | 7 | - | TODO |
+| FR-08 | Typed tokens, batch-consistent pseudonyms | 6 | `tests/unit/test_redact_units.py::test_tokens_are_batch_scoped_typed_and_consistent`<br>`tests/integration/test_redact_fixtures.py::test_same_person_gets_the_same_token_across_files` | PASS |
+| FR-09 | Secure redacted files, no overlays | 6 | `tests/integration/test_redact_fixtures.py::test_planted_values_absent_from_output_and_sanitized_text`<br>`tests/integration/test_redact_fixtures.py::test_scanned_output_has_no_original_image_objects`<br>`tests/integration/test_redact_fixtures.py::test_ooxml_parts_rels_and_metadata` | PASS |
+| FR-10 | Independent verification | 7 | `tests/integration/test_verify_faults.py::test_value_left_in_the_output_is_blocked_g1`<br>`tests/integration/test_verify_faults.py::test_new_identifier_planted_in_output_only_is_blocked_g2`<br>`tests/integration/test_verify_faults.py::test_verification_crash_fails_closed` | PASS |
 | FR-11 | Enforced privacy gate states (gate done; API 403/409 in Phase 8) | 1, 8 | `tests/unit/test_gate_machine.py::test_illegal_transition_raises_and_changes_nothing`<br>`tests/unit/test_db.py::test_direct_update_to_safe_from_processing_is_rejected` | PARTIAL |
-| FR-12 | Human review and re-verify | 8 | - | TODO |
-| FR-13 | Processing report without raw PII | 8 | - | TODO |
-| FR-14 | AI handoff via SafeHandle (MockAgent) | 8 | - | TODO |
-| FR-15 | Evaluation harness | 10 | - | TODO |
+| FR-12 | Human review and re-verify | 8, 9 | `tests/integration/test_api.py::test_review_path_reaches_safe`<br>`tests/integration/test_api.py::test_reviewer_can_reject_a_document`<br>`tests/e2e/test_ui_smoke.py::test_upload_review_download_handoff` | PASS |
+| FR-13 | Processing report without raw PII | 8 | `tests/integration/test_api.py::test_reports_and_logs_never_carry_planted_values`<br>`tests/integration/test_api.py::test_safe_job_downloads_report_and_handoff` | PASS |
+| FR-14 | AI handoff via SafeHandle (MockAgent) | 8 | `tests/integration/test_api.py::test_safe_job_downloads_report_and_handoff`<br>`tests/integration/test_api.py::test_non_safe_job_refuses_outputs` | PASS |
+| FR-15 | Evaluation harness (harness, metrics and report done on synthetic gold; real-sample numbers wait for the annotated gold set) | 10 | `tests/integration/test_eval_harness.py::test_planted_docx_and_png_score_without_leaks`<br>`tests/integration/test_eval_harness.py::test_report_renders_counts_only`<br>`tests/integration/test_eval_harness.py::test_samples_mode_refuses_without_gold`<br>`tests/unit/test_eval.py::test_score_job_counts_tp_fp_copies_leaks_keeps_and_calibration_items` | PARTIAL |
 | FR-16 | Audit trail, policy hash per job (history and immutable hash; reports in Phase 8) | 1, 8 | `tests/unit/test_db.py::test_history_records_every_change_with_rule_reason_and_time`<br>`tests/unit/test_db.py::test_policy_hash_is_immutable` | PARTIAL |
 | FR-17 | YAML policy configuration and hash (load, validate, hash; per-job recording in Phase 1) | 0 | `tests/unit/test_config.py::test_default_policy_loads`<br>`tests/unit/test_config.py::test_policy_hash_stable_across_key_reordering_in_yaml`<br>`tests/unit/test_config.py::test_invalid_policies_are_rejected` | PARTIAL |
 | FR-18 | Standalone images (extraction done; redaction in Phase 6) | 3, 6 | `tests/integration/test_extract_fixtures.py::test_coverage_is_complete` | PARTIAL |
@@ -52,7 +52,7 @@ Last updated: Phase 5 (14 Oct 2026).
 | TR-DT-14 | L4 context rules: person labels and headers, honorifics, initials, partial financial, SSN last-4, home address | 4, 5 | `tests/unit/test_recognizers.py::test_partial_financial_positives`<br>`tests/unit/test_recognizers.py::test_ssn_last_four`<br>`tests/unit/test_recognizers.py::test_home_address_with_trigger`<br>`tests/unit/test_recognizers.py::test_corporate_addresses_are_kept`<br>`tests/unit/test_detect_context.py::test_two_common_word_name_under_created_by_is_corroborated`<br>`tests/unit/test_detect_context.py::test_honorific_led_by_and_label_names_are_caught` | PASS |
 | TR-DT-15 | L5 registry, variants, propagation (exact, fuzzy OCR, unique surname), batch-wide person keys | 5 | `tests/unit/test_detect_context.py::test_canonical_key_and_variants`<br>`tests/unit/test_detect_context.py::test_fuzzy_ocr_match_and_native_exactness`<br>`tests/unit/test_detect_context.py::test_surname_only_rules`<br>`tests/unit/test_detect_context.py::test_initial_surname_header_is_linked_to_registered_person` | PASS |
 | TR-DT-16 | Region findings (faces, unreadable) | 5 | `tests/unit/test_detect_context.py::test_region_findings`<br>`tests/integration/test_detect_fixtures.py::test_expected_regions_become_findings` | PASS |
-| TR-DT-30 | Calibration (k-fold) | 10 | - | TODO |
+| TR-DT-30 | Calibration (k-fold) (fitting, folds and policy write done; the policy keeps 0.40 until real gold exists) | 10 | `tests/unit/test_eval.py::test_fit_threshold_maximises_recall_under_precision_target`<br>`tests/unit/test_eval.py::test_calibration_reports_held_out_folds`<br>`tests/unit/test_eval.py::test_write_threshold_changes_only_that_line_and_the_hash`<br>`tests/integration/test_eval_harness.py::test_threshold_is_never_written_from_synthetic_data` | PARTIAL |
 | TR-EX-01 | PDF native chars and image coverage | 3 | `tests/integration/test_extract_fixtures.py::test_scanned_pdf_has_no_native_text_and_all_pages_ocr`<br>`tests/integration/test_extract_samples.py::test_pdf_is_fully_scanned_and_fig3_is_flagged` | PASS |
 | TR-EX-02 | PDF OCR routing rule and native/OCR merge | 3 | `tests/integration/test_extract_fixtures.py::test_mixed_page_routes_to_ocr_and_drops_duplicate_ocr_lines`<br>`tests/integration/test_extract_fixtures.py::test_scanned_pdf_has_no_native_text_and_all_pages_ocr` | PASS |
 | TR-EX-03 | OCR embedded images on native pages | 3 | `tests/integration/test_extract_fixtures.py::test_planted_item_extracted_at_expected_locator`<br>`tests/integration/test_extract_failclosed.py::test_ocr_disabled_native_pdf_with_image_ends_blocked` | PASS |
@@ -86,30 +86,30 @@ Last updated: Phase 5 (14 Oct 2026).
 | TR-PF-03 | Scanned PDF <= 20 s/page | 11 | - | TODO |
 | TR-PF-04 | Progress at least every 5 s | 9 | - | TODO |
 | TR-PF-05 | spaCy loaded once per process, shared by NER and the word list | 5 | `tests/unit/test_detect_context.py::test_spacy_model_loaded_once_per_process` | PASS |
-| TR-RD-01 | Batch-scoped typed tokens | 6 | - | TODO |
+| TR-RD-01 | Batch-scoped typed tokens | 6 | `tests/unit/test_redact_units.py::test_tokens_are_batch_scoped_typed_and_consistent`<br>`tests/unit/test_redact_units.py::test_token_styles`<br>`tests/unit/test_redact_units.py::test_batch_delete_removes_vault_rows` | PASS |
 | TR-RD-02 | Fernet vault, refuse start without key (key presence/format check only) | 0, 6 | `tests/unit/test_config.py::test_vault_key_validation` | PARTIAL |
-| TR-RD-10 | DOCX/PPTX run-level writer | 6 | - | TODO |
-| TR-RD-11 | OOXML integrity | 6 | - | TODO |
-| TR-RD-20 | Scanned PDF raster burn-in | 6 | - | TODO |
-| TR-RD-21 | Native PDF true redaction | 6 | - | TODO |
-| TR-RD-30 | Sanitized text renderer | 6 | - | TODO |
+| TR-RD-10 | DOCX/PPTX run-level writer | 6 | `tests/unit/test_redact_units.py::test_span_crossing_three_runs_keeps_first_run_formatting`<br>`tests/unit/test_redact_units.py::test_several_spans_in_one_run_and_unmappable_span`<br>`tests/unit/test_redact_units.py::test_generic_pieces_keep_surrounding_whitespace` | PASS |
+| TR-RD-11 | OOXML integrity | 6 | `tests/integration/test_redact_fixtures.py::test_ooxml_parts_rels_and_metadata`<br>`tests/integration/test_redact_fixtures.py::test_outputs_reopen_in_two_parsers_with_unchanged_counts` | PASS |
+| TR-RD-20 | Scanned PDF raster burn-in | 6 | `tests/integration/test_redact_fixtures.py::test_scanned_output_has_no_original_image_objects`<br>`tests/unit/test_redact_units.py::test_span_boxes_cover_only_the_span_words` | PASS |
+| TR-RD-21 | Native PDF true redaction | 6 | `tests/integration/test_redact_fixtures.py::test_planted_values_absent_from_output_and_sanitized_text`<br>`tests/integration/test_redact_fixtures.py::test_end_states` | PASS |
+| TR-RD-30 | Sanitized text renderer | 6 | `tests/unit/test_redact_units.py::test_render_markers_and_tokens`<br>`tests/integration/test_redact_fixtures.py::test_sanitized_text_uses_typed_tokens` | PASS |
 | TR-RD-40 | Unapplied action blocks gate (G4 rule done; writers in Phase 6) | 1, 6 | `tests/unit/test_gate_rules.py::test_each_rule_fires_alone` | PARTIAL |
-| TR-RV-01 | Review item contents | 8 | - | TODO |
-| TR-RV-02 | Review actions, no reject of HIGH DETERMINISTIC | 8 | - | TODO |
-| TR-RV-03 | Re-redact and re-verify after review | 8 | - | TODO |
-| TR-RV-04 | Review log without raw values | 8 | - | TODO |
+| TR-RV-01 | Review item contents | 8 | `tests/integration/test_api.py::test_review_path_reaches_safe` | PASS |
+| TR-RV-02 | Review actions, no reject of HIGH DETERMINISTIC | 8 | `tests/integration/test_api.py::test_review_path_reaches_safe`<br>`tests/integration/test_api.py::test_reviewer_can_reject_a_document` | PASS |
+| TR-RV-03 | Re-redact and re-verify after review | 8 | `tests/integration/test_api.py::test_review_path_reaches_safe`<br>`tests/integration/test_verify_faults.py::test_pixels_missed_by_the_writer_are_repaired_then_reverified` | PASS |
+| TR-RV-04 | Review log without raw values | 8 | `tests/integration/test_api.py::test_reports_and_logs_never_carry_planted_values` | PASS |
 | TR-SEC-01 | No outbound network, socket-blocked tests (suite runs socket-blocked; pipeline run later) | 0, 11 | `tests/security/test_network.py::test_outbound_socket_is_blocked`<br>`tests/security/test_network.py::test_raw_socket_construction_is_blocked` | PARTIAL |
 | TR-SEC-02 | Raw values only in memory and vault (models and errors; models, errors, meta.db findings; logs/reports in Phase 8) | 0, 8 | `tests/unit/test_models.py::test_segment_text_never_serialises`<br>`tests/unit/test_models.py::test_finding_value_never_serialises`<br>`tests/unit/test_models.py::test_property_any_text_is_absent_from_dumps`<br>`tests/unit/test_errors.py::test_content_like_details_are_redacted`<br>`tests/unit/test_db.py::test_findings_are_stored_without_raw_values` | PARTIAL |
 | TR-SEC-03 | PiiSafeFilter and log grep (filter done; sample log grep later) | 0, 8 | `tests/unit/test_logging.py::test_record_with_active_needle_is_dropped`<br>`tests/unit/test_logging.py::test_exception_args_and_traceback_are_stripped` | PARTIAL |
 | TR-SEC-04 | Restricted job dirs (0700 / Windows ACL, ADR-25), O_EXCL, safe filenames | 2 | `tests/unit/test_storage.py::test_job_dir_is_created_once_and_restricted`<br>`tests/unit/test_storage.py::test_upload_is_stored_as_original_with_o_excl`<br>`tests/unit/test_storage.py::test_display_names_are_sanitised`<br>`tests/integration/test_pipeline.py::test_upload_is_stored_under_job_dir_as_original` | PASS |
-| TR-SEC-05 | Server-side state enforcement on artifacts | 8 | - | TODO |
+| TR-SEC-05 | Server-side state enforcement on artifacts | 8 | `tests/integration/test_api.py::test_non_safe_job_refuses_outputs`<br>`tests/integration/test_api.py::test_tokens_and_roles` | PASS |
 | TR-SEC-06 | TTL sweeper and batch delete (store-level delete done; sweeper and endpoint in Phase 8) | 1, 8 | `tests/unit/test_db.py::test_delete_batch_removes_jobs_history_and_findings` | PARTIAL |
 | TR-SEC-07 | Parser hardening (DTD/XXE, zip bomb, page and image limits done; OCR timeout and XML parts done; RLIMIT_AS Phase 11) | 2, 3, 11 | `tests/unit/test_validator.py::test_xxe_in_content_types_is_rejected`<br>`tests/unit/test_validator.py::test_billion_laughs_is_rejected`<br>`tests/unit/test_validator.py::test_zip_bomb_by_ratio`<br>`tests/unit/test_validator.py::test_too_many_pages`<br>`tests/integration/test_extract_failclosed.py::test_ocr_timeout_marks_page_uninspected`<br>`tests/integration/test_extract_failclosed.py::test_xxe_in_a_referenced_part_is_uninspected_and_blocks` | PARTIAL |
-| TR-SEC-08 | No original XObjects or thumbnails in output | 6 | - | TODO |
+| TR-SEC-08 | No original XObjects or thumbnails in output | 6 | `tests/integration/test_redact_fixtures.py::test_scanned_output_has_no_original_image_objects`<br>`tests/integration/test_redact_fixtures.py::test_ooxml_parts_rels_and_metadata`<br>`tests/integration/test_redact_fixtures.py::test_image_output_has_no_exif` | PASS |
 | TR-SEC-09 | Documented prototype limits | 11 | - | TODO |
-| V1 | Output reopens via two parsers | 7 | - | TODO |
-| V2 | Known-value leak check | 7 | - | TODO |
-| V3 | Residual scan | 7 | - | TODO |
-| V4 | Coverage | 7 | - | TODO |
-| V5 | Overlap and consistency | 7 | - | TODO |
-| V6 | Structure SRS/CRS | 7 | - | TODO |
+| V1 | Output reopens via two parsers | 7 | `tests/integration/test_redact_fixtures.py::test_outputs_reopen_in_two_parsers_with_unchanged_counts`<br>`tests/integration/test_verify_faults.py::test_output_that_does_not_reopen_fails_g0` | PASS |
+| V2 | Known-value leak check | 7 | `tests/unit/test_redact_units.py::test_needles_and_boundaries`<br>`tests/integration/test_verify_faults.py::test_value_left_in_the_output_is_blocked_g1` | PASS |
+| V3 | Residual scan | 7 | `tests/integration/test_verify_faults.py::test_new_identifier_planted_in_output_only_is_blocked_g2` | PASS |
+| V4 | Coverage | 7 | `tests/unit/test_redact_units.py::test_mask_effect_codes_tolerated_only_on_masked_rasters`<br>`tests/integration/test_redact_fixtures.py::test_outputs_reopen_in_two_parsers_with_unchanged_counts` | PASS |
+| V5 | Overlap and consistency | 7 | `tests/unit/test_redact_units.py::test_consistency_checks`<br>`tests/integration/test_verify_faults.py::test_token_without_vault_entry_is_blocked_g5` | PASS |
+| V6 | Structure SRS/CRS | 7 | `tests/unit/test_redact_units.py::test_srs_and_crs`<br>`tests/integration/test_redact_fixtures.py::test_end_states` | PASS |

@@ -375,3 +375,30 @@ context, decision, alternatives and consequences.
 - **Consequences:** Node 18+ is needed to build the UI (`make ui`). The brief's Playwright
   exit criterion is met with Python Playwright driving the Edge installed with Windows
   (no browser download); on other systems the e2e test is skipped.
+
+### ADR-33: Evaluation scoring rules and one calibrated threshold
+- **Context:** TRD 9 defines the metrics and TRD 6.4 asks for per-tier thresholds fitted
+  on gold. The policy has a single `detection.review_threshold`, the only score-routed
+  boundary (DETERMINISTIC and CORROBORATED do not depend on a score; SINGLE_SIGNAL vs LOW
+  does). The real-sample gold set has to come from the user's annotators; only the
+  synthetic manifest exists today.
+- **Decision:**
+  1. Calibration fits that one threshold (recall maximised subject to precision >= 0.50,
+     5-fold over segments, held-out results reported). When no threshold meets the target
+     the lowest observed score is chosen: fail closed redacts more, never less.
+  2. The threshold is written into the policy only on request (`--write-threshold`) and
+     only from the annotated real-sample gold; a run on synthetic data refuses to write.
+  3. A prediction that matches no gold span but carries a gold value of the same file and
+     type elsewhere is a propagated copy (ADR-28): neither TP nor FP, counted separately.
+  4. The leak metric is exact (normalised text, or the digit run of a numeric value with
+     at least 6 digits) over the re-extracted output and the sanitized text; garbled OCR
+     residues stay the job of V2/V3.
+  5. `make eval` scores the synthetic fixtures (`eval/report.md`, committed, counts and
+     metrics only). `python -m eval.run_eval --samples` scores the real files against
+     `eval/gold/*.jsonl` into `out/eval-samples.md` (git-ignored). `python -m
+     eval.draft_gold` writes value-free draft gold files for the annotators.
+- **Alternatives:** per-tier thresholds (no score exists for the deterministic tiers);
+  fitting on synthetic data (it would tune to planted values, the opposite of TRD 6.4).
+- **Consequences:** `review_threshold` stays 0.40 until real gold exists, so the real-sample
+  review load is not yet calibrated. Synthetic numbers are a regression signal, not an
+  accuracy estimate; the report says so.

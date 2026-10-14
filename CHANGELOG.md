@@ -6,6 +6,12 @@ phase tags (`v0.NN.0`).
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-14: Phase 10, evaluation harness
+### Added
+- `make eval`: metrics of TRD 9 with Wilson intervals, synthetic report `eval/report.md`,
+  `--samples` mode for annotated gold, threshold calibration with k-fold (ADR-33),
+  draft gold files for annotators.
+
 ## [0.9.0] - 2026-10-14: Phase 9, React web UI integrated
 ### Added
 - The React UI in `cleargate-ui/` talks to the real API (ADR-32); `make ui`, `make run`,
