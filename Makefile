@@ -12,7 +12,7 @@ else
 endif
 PY := $(VENV_BIN)/python
 
-.PHONY: setup keys doctor lint format test test-all smoke eval run ui e2e check clean gate-demo
+.PHONY: setup keys doctor lint format test test-all smoke eval eval-samples draft-gold run ui e2e check clean gate-demo
 
 setup:
 	test -x $(PY) || $(BOOTSTRAP_PY) -m venv .venv
@@ -48,6 +48,12 @@ smoke:
 
 eval:
 	$(PY) -m eval.run_eval
+
+eval-samples:
+	$(PY) -m eval.run_eval --samples
+
+draft-gold:
+	$(PY) -m eval.draft_gold
 
 ui:
 	cd cleargate-ui && npm ci && npm run build
