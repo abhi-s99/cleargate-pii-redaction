@@ -166,3 +166,18 @@ def test_ocr_disabled_sample_pdf_ends_blocked_g3(
     state, rule, reason = run_one(settings_for(tmp_path, None), policy, pdf)
     assert (state, rule) == ("BLOCKED", "G3")
     assert reason.startswith("UNINSPECTED_PARTS=35,")
+
+
+def test_ocr_worker_pool_matches_in_process_ocr(ocr_settings: Settings, tmp_path: Path) -> None:
+    """TR-SEC-07, ADR-34: the spawned, memory-limited OCR pool gives the same text."""
+    from tests.integration.conftest import extract_file
+
+    pooled = ocr_settings.model_copy(
+        update={"ocr_workers": 2, "data_dir": tmp_path / "pool", "worker_mem_mb": 6144}
+    )
+    (tmp_path / "pool").mkdir()
+    a = extract_file(SYNTHETIC / "planted_scanned.pdf", ocr_settings, tmp_path / "j1")
+    b = extract_file(SYNTHETIC / "planted_scanned.pdf", pooled, tmp_path / "j2")
+    assert b.coverage.issues == a.coverage.issues
+    assert [s.text for s in b.segments] == [s.text for s in a.segments]
+    assert len(b.regions) == len(a.regions)

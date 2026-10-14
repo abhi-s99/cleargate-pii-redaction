@@ -202,6 +202,7 @@ class Settings(BaseModel):
     tesseract_cmd: str | None = None
     policy_path: Path = DEFAULT_POLICY_PATH
     ocr_workers: int = Field(default_factory=lambda: max(1, min(4, (os.cpu_count() or 2) - 1)))
+    worker_mem_mb: int = Field(6144, ge=0)  # RLIMIT_AS per OCR worker, POSIX only; 0 = off
 
 
 def _secret(env: Mapping[str, str], name: str) -> SecretStr | None:
@@ -248,6 +249,11 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         **(
             {"ocr_workers": int(w)}
             if (w := env.get("CLEARGATE_OCR_WORKERS", "").strip()).isdigit()
+            else {}
+        ),
+        **(
+            {"worker_mem_mb": int(m)}
+            if (m := env.get("CLEARGATE_WORKER_MEM_MB", "").strip()).isdigit()
             else {}
         ),
     )

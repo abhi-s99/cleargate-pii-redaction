@@ -14,6 +14,7 @@ registered as uninspected (``EMBEDDED_OBJECT``), which blocks the gate (G3).
 
 from __future__ import annotations
 
+import multiprocessing
 import statistics
 import time
 from concurrent.futures import ProcessPoolExecutor
@@ -26,6 +27,7 @@ import pymupdf
 from PIL import Image
 
 from cleargate.core.errors import OcrError
+from cleargate.core.limits import enforced, limit_memory
 from cleargate.core.models import Document, FileFormat, Locator
 from cleargate.extract.base import DocBuilder, analyse_raster
 from cleargate.extract.image import (
@@ -202,12 +204,22 @@ class PdfExtractor:
         ]
         workers = min(len(pages), max(1, s.ocr_workers))
         out: dict[int, PageAnalysis] = {}
-        if workers == 1:
+        # Under a memory limit OCR always runs in worker processes, never in the service
+        # process itself (TR-SEC-07, ADR-34).
+        if workers == 1 and not (s.worker_mem_mb and enforced()):
             for done, a in enumerate(map(analyse_page, args), 1):
                 out[a.index] = a
                 ctx.report("ocr", done, len(pages))
             return out
-        with ProcessPoolExecutor(max_workers=workers) as pool:
+        # "spawn" everywhere: a forked worker would inherit the service's address space
+        # (spaCy loaded, several GB) and start above its RLIMIT_AS; forking from the API's
+        # worker thread is unsafe as well (ADR-34).
+        with ProcessPoolExecutor(
+            max_workers=workers,
+            mp_context=multiprocessing.get_context("spawn"),
+            initializer=limit_memory,
+            initargs=(s.worker_mem_mb,),
+        ) as pool:
             for done, a in enumerate(pool.map(analyse_page, args), 1):
                 out[a.index] = a
                 ctx.report("ocr", done, len(pages))
