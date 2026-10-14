@@ -1,0 +1,21 @@
+# docker compose up --build   ->  http://127.0.0.1:8000  (tokens from .env, see README)
+services:
+  cleargate:
+    build: .
+    image: cleargate:0.11.0
+    env_file: .env                 # CLEARGATE_VAULT_KEY, _GATE_KEY, _SUBMITTER_TOKEN, _REVIEWER_TOKEN
+    environment:
+      CLEARGATE_WORKER_MEM_MB: "6144"   # RLIMIT_AS (virtual size) per OCR worker (TR-SEC-07, ADR-34)
+    ports:
+      - "127.0.0.1:${CLEARGATE_PORT:-8000}:8000"   # loopback only; CLEARGATE_PORT changes the host port
+    volumes:
+      - cleargate-data:/data
+    mem_limit: 8g                  # resident memory of the whole container
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+volumes:
+  cleargate-data:
