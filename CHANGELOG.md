@@ -5,6 +5,13 @@ All notable changes to this project are documented here. The format follows
 phase tags (`v0.NN.0`).
 
 ## [Unreleased]
+### Fixed
+- The synthetic `planted.docx` did not open in Word (its text box lacked the anchor and
+  shape children Word requires); redacted outputs inherited the problem. Regenerated, and
+  an opt-in test now opens fixtures and redacted outputs in Word and PowerPoint.
+- The UI took the user's role from the Connect page selection; it now asks the server
+  (`GET /whoami`, ADR-35).
+
 ### Added
 - `REFERENCE_GAP_ANALYSIS.md`: Smart-Redact (as documented) vs ClearGate, 15 areas with
   test evidence.

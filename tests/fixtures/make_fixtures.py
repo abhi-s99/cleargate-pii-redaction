@@ -138,17 +138,31 @@ NS = (
 
 
 def textbox_run(text: str) -> Any:
-    """A text box the way Word writes it: DrawingML Choice plus a VML Fallback copy."""
+    """A text box the way Word writes it: DrawingML Choice plus a VML Fallback copy.
+
+    Word refuses a ``wp:anchor`` or ``wps:wsp`` without its required children (position,
+    wrapping, frame and shape properties, body properties), so they are all present.
+    """
     para = f"<w:p><w:r><w:t>{text}</w:t></w:r></w:p>"
     return parse_xml(
         f'<w:r {NS}><mc:AlternateContent><mc:Choice Requires="wps"><w:drawing>'
-        '<wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="1" '
-        'behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/>'
-        '<wp:extent cx="2000000" cy="400000"/><wp:docPr id="900" name="Text Box 1"/>'
+        '<wp:anchor distT="0" distB="0" distL="114300" distR="114300" simplePos="0" '
+        'relativeHeight="251659264" behindDoc="0" locked="0" layoutInCell="1" '
+        'allowOverlap="1"><wp:simplePos x="0" y="0"/>'
+        '<wp:positionH relativeFrom="column"><wp:posOffset>0</wp:posOffset></wp:positionH>'
+        '<wp:positionV relativeFrom="paragraph"><wp:posOffset>0</wp:posOffset></wp:positionV>'
+        '<wp:extent cx="2000000" cy="400000"/><wp:effectExtent l="0" t="0" r="0" b="0"/>'
+        '<wp:wrapNone/><wp:docPr id="900" name="Text Box 1"/><wp:cNvGraphicFramePr/>'
         '<a:graphic><a:graphicData uri="http://schemas.microsoft.com/office/word/2010/'
-        f'wordprocessingShape"><wps:wsp><wps:txbx><w:txbxContent>{para}</w:txbxContent>'
-        "</wps:txbx></wps:wsp></a:graphicData></a:graphic></wp:anchor></w:drawing></mc:Choice>"
-        f"<mc:Fallback><w:pict><v:shape><v:textbox><w:txbxContent>{para}</w:txbxContent>"
+        'wordprocessingShape"><wps:wsp><wps:cNvSpPr txBox="1"/><wps:spPr>'
+        '<a:xfrm><a:off x="0" y="0"/><a:ext cx="2000000" cy="400000"/></a:xfrm>'
+        '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></wps:spPr>'
+        f"<wps:txbx><w:txbxContent>{para}</w:txbxContent></wps:txbx>"
+        '<wps:bodyPr rot="0" vert="horz" wrap="square" anchor="t"/></wps:wsp>'
+        "</a:graphicData></a:graphic></wp:anchor></w:drawing></mc:Choice>"
+        '<mc:Fallback><w:pict><v:shape id="TextBox1" type="#_x0000_t202" '
+        'style="position:absolute;width:157.5pt;height:31.5pt"><v:textbox>'
+        f"<w:txbxContent>{para}</w:txbxContent>"
         "</v:textbox></v:shape></w:pict></mc:Fallback></mc:AlternateContent></w:r>"
     )
 
