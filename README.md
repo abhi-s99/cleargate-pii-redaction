@@ -77,7 +77,7 @@ Sanitized: [PERSON_1] from Finance can be contacted at [EMAIL_1].
 | Reports + audit trail | Yes | Yes | Yes ([Phase 8](docs/phases/PHASE-08-api.md)) |
 | Evaluation harness + calibration (synthetic gold; real-sample gold set from annotators pending, ADR-33) | Yes | Yes | Partial ([Phase 10](docs/phases/PHASE-10-eval.md), [eval/report.md](eval/report.md)) |
 | Hardening (OCR worker memory limit), Docker image + compose, demo script | Yes | Yes | Yes ([Phase 11](docs/phases/PHASE-11-hardening.md)) |
-| `REFERENCE_GAP_ANALYSIS.md` | partial (summary in Architecture §3) | No | No |
+| [`REFERENCE_GAP_ANALYSIS.md`](REFERENCE_GAP_ANALYSIS.md) (15 areas, test evidence per row) | Yes | Yes | Yes (cited tests exist and pass) |
 | XLSX, legacy `.doc/.ppt` | stretch | No | No |
 
 ## Supported formats (v1 target)

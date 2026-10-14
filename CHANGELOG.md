@@ -5,6 +5,9 @@ All notable changes to this project are documented here. The format follows
 phase tags (`v0.NN.0`).
 
 ## [Unreleased]
+### Added
+- `REFERENCE_GAP_ANALYSIS.md`: Smart-Redact (as documented) vs ClearGate, 15 areas with
+  test evidence.
 
 ## [0.11.0] - 2026-10-14: Phase 11, hardening, Docker, demo
 ### Added

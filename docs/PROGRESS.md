@@ -19,7 +19,7 @@ Nothing. All phases are done; the items below need the user or their team.
 1. User's team: annotate `eval/gold/*.jsonl` (drafts via `make draft-gold`), then
    `make eval-samples` and, if wanted, `--write-threshold` (ADR-33).
 2. TR-PF-02: the DOCX sample took 199 s against 180 s; profile the image OCR path.
-3. Stakeholder deck and `REFERENCE_GAP_ANALYSIS.md` (brief deliverables).
+3. Stakeholder deck (brief deliverable). `REFERENCE_GAP_ANALYSIS.md` is done.
 
 ## Open questions
 
