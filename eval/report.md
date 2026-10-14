@@ -1,6 +1,6 @@
 # Evaluation report
 
-Generated 2026-10-14T02:22:59+00:00 by `python -m eval.run_eval`. Gold: synthetic manifest (synthetic). Policy `cadence-default` hash `c04ecbc88aea0486`, review threshold 0.40. CPU count 12. Batch wall time 16.6 s. Counts and metrics only, no document values.
+Generated 2026-10-14T04:22:46+00:00 by `python -m eval.run_eval`. Gold: synthetic manifest (synthetic). Policy `cadence-default` hash `c04ecbc88aea0486`, review threshold 0.40. CPU count 12. Batch wall time 15.8 s. Counts and metrics only, no document values.
 
 Intervals are 95 % Wilson score intervals; n is shown with every rate. With this few documents every number is weak evidence (TRD 6.4).
 
@@ -21,10 +21,10 @@ Intervals are 95 % Wilson score intervals; n is shown with every rate. With this
 
 | File | State | Rule | Units | Gold | Not extracted | Leaked | Findings | Review | Regions found/gold | Keep-list redacted | SRS | CRS |
 |---|---|---|---:|---:|---:|---:|---:|---:|---|---|---:|---:|
-| planted.docx | REVIEW_REQUIRED | G6 | 21 | 28 | 0 | 0 | 30 | 2 | 1/1 | 0/4 | 1.000 | 1.000 |
-| planted.pptx | REVIEW_REQUIRED | G6 | 10 | 16 | 0 | 0 | 18 | 1 | 1/1 | 0/0 | 1.000 | 1.000 |
-| planted_native.pdf | VALIDATED_SAFE | G7 | 3 | 8 | 0 | 0 | 8 | 0 | 0/0 | 0/1 | 1.000 | 1.000 |
-| planted_scanned.pdf | REVIEW_REQUIRED | G6 | 4 | 8 | 0 | 0 | 11 | 1 | 2/2 | 0/2 | 1.000 | 1.000 |
+| planted.docx | REVIEW_REQUIRED | G6 | 2 | 28 | 0 | 0 | 30 | 2 | 1/1 | 0/4 | 1.000 | 1.000 |
+| planted.pptx | REVIEW_REQUIRED | G6 | 3 | 16 | 0 | 0 | 18 | 1 | 1/1 | 0/0 | 1.000 | 1.000 |
+| planted_native.pdf | VALIDATED_SAFE | G7 | 2 | 8 | 0 | 0 | 8 | 0 | 0/0 | 0/1 | 1.000 | 1.000 |
+| planted_scanned.pdf | REVIEW_REQUIRED | G6 | 2 | 8 | 0 | 0 | 11 | 1 | 2/2 | 0/2 | 1.000 | 1.000 |
 | planted.png | VALIDATED_SAFE | G7 | 1 | 2 | 0 | 0 | 2 | 0 | 0/0 | 0/0 | 1.000 | 1.000 |
 
 ## Detection, overlap match (character IoU >= 0.5, same type)
@@ -89,22 +89,22 @@ Threshold-routed findings n=7 (positives 4), precision target 0.50, 5-fold cross
 | Fold | Fitted threshold | Held-out TP | Held-out FP | Held-out positives |
 |---:|---:|---:|---:|---:|
 | 1 | 0.600 | 1 | 0 | 1 |
-| 2 | 0.600 | 0 | 0 | 0 |
+| 2 | 0.600 | 1 | 0 | 1 |
 | 3 | 0.600 | 1 | 0 | 1 |
 | 4 | 0.600 | 1 | 0 | 1 |
-| 5 | 0.600 | 1 | 0 | 1 |
+| 5 | 0.600 | 0 | 0 | 0 |
 
 Cross-validated recall 1.000, precision 1.000. Threshold fitted on all items: 0.600 (policy: 0.40). The policy is changed only with `--write-threshold`, and never from synthetic data alone.
 
-## Timing per unit (page, slide or image), seconds
+## Timing per unit (PDF page, slide, image frame; a DOCX counts as one unit), seconds
 
 | Stage | p50 | p95 | n jobs |
 |---|---:|---:|---:|
-| validate | 0.00 | 0.01 | 5 |
-| extract | 0.09 | 0.83 | 5 |
-| detect | 0.73 | 2.92 | 5 |
-| redact | 0.01 | 0.06 | 5 |
-| verify | 0.28 | 0.89 | 5 |
+| validate | 0.01 | 0.01 | 5 |
+| extract | 0.29 | 1.66 | 5 |
+| detect | 1.23 | 2.46 | 5 |
+| redact | 0.02 | 0.13 | 5 |
+| verify | 0.51 | 1.79 | 5 |
 | gate | - | - | 0 |
 
 ## Method and limitations
