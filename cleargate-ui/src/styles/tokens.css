@@ -1,0 +1,52 @@
+/* VERIFIED BRAND THEME TOKENS.
+   Source: DevTools extracted tokens JSON for Optiv. */
+:root {
+  /* Surface and Backgrounds */
+  --bg: #FFFFFF; /* [JSON: body.backgroundColor = "rgb(255, 255, 255)", rootVars["--white"]] */
+  --bg-alt: #F4F5F8; /* [JSON: rootVars["--off-white"] = "#F4F5F8"] */
+  --surface: #FFFFFF; /* [JSON: rootVars["--white"], nav.backgroundColor = "rgb(255, 255, 255)"] */
+  --surface-raised: #F0F2F5; /* [JSON: rootVars["--light-grey"] = "#F0F2F5"] */
+
+  /* Typography Colors */
+  --text: #0A0E1A; /* [JSON: body.color = "rgb(10, 14, 26)", rootVars["--dark-text"]] */
+  --text-muted: #4B5563; /* [JSON: rootVars["--body-text"] = "#4B5563"] */
+  --text-on-accent: #FFFFFF; /* [JSON: a.color = "rgb(255, 255, 255)", rootVars["--white"]] */
+
+  /* Accents & Brand Actions (Optiv Orange & Navy Palette) */
+  --accent: rgba(232, 93, 31, 1); /* [User specified: rgba(232, 93, 31)] */
+  --accent-hover: rgb(210, 80, 24); /* Accessible darker shade of rgba(232, 93, 31) */
+  --link: rgb(232, 93, 31); /* Cohesive interactive link color */
+  --border: rgba(0, 0, 0, 0.08); /* [JSON: rootVars["--border"] = "rgba(0,0,0,0.08)"] */
+  --focus-ring: rgba(232, 93, 31, 0.4);
+
+  /* Hero & Footer bands (Navy Core) */
+  --hero-bg: #0F1A3A; /* [JSON: rootVars["--navy"] = "#0F1A3A", h2.color] */
+  --hero-text: #FFFFFF; /* [JSON: h1.color = "rgb(255, 255, 255)"] */
+  --footer-bg: #0F1A3A; /* [JSON: footer.backgroundColor = "rgb(15, 26, 58)", rootVars["--navy"]] */
+  --footer-text: #FFFFFF; /* [JSON: footer.color = "rgb(255, 255, 255)"] */
+
+  /* Typography Stacks */
+  /* [JSON: body.fontFamily, h1.fontFamily = "Inter, \"Segoe UI\", system-ui, -apple-system, BlinkMacSystemFont, sans-serif"] */
+  --font-heading: 'Inter', "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Layout and Geometry */
+  --radius-sm: 4px; /* [JSON: rootVars["--radius-sm"] = "4px"] */
+  --radius-md: 8px; /* [JSON: rootVars["--radius"] = "8px", primaryButton.borderRadius] */
+  --radius-lg: 12px; /* [JSON: rootVars["--radius-lg"] = "12px", card.borderRadius] */
+  --shadow-card: 0 1px 3px rgba(15, 26, 58, 0.06);
+  --container-max: 1400px;
+
+  /* Product Semantics: Status Colors */
+  --status-safe: #16A34A; /* Verified safe emerald green */
+  --status-safe-bg: #DCFCE7;
+  --status-review: #D97706;
+  --status-review-bg: rgba(217, 119, 6, 0.1);
+  --status-blocked: #DC2626;
+  --status-blocked-bg: rgba(220, 38, 38, 0.1);
+  --status-failed: #B91C1C;
+  --status-failed-bg: rgba(185, 28, 28, 0.1);
+  --status-processing: #1D4ED8; /* [JSON: rootVars["--blue"] = "#1D4ED8"] */
+  --status-processing-bg: rgba(29, 78, 216, 0.1);
+}

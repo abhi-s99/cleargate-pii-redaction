@@ -25,13 +25,17 @@ TEXT_SUFFIXES = {
     ".html",
     ".css",
     ".js",
+    ".ts",
+    ".tsx",
+    ".cjs",
+    ".mjs",
     ".sh",
     ".ps1",
     ".gitignore",
     ".baseline",
     "",
 }
-SKIP_PARTS = {".venv", ".git", "node_modules", "synthetic"}
+SKIP_PARTS = {".venv", ".git", "node_modules", "synthetic", "dist"}
 
 EM_DASH = "\u2014"
 

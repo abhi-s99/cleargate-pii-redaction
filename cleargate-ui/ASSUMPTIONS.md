@@ -1,0 +1,14 @@
+# ClearGate Frontend Assumptions Log
+
+This document tracks all design decisions and conservative assumptions made where the API contract or specifications had gaps (per Rule R3 & Section 4.1).
+
+| ID | Assumption | Code Location | How to Confirm |
+|---|---|---|---|
+| A-1 | **Batch persistence (G1)**: In the absence of `GET /batches` or `GET /batches/{id}`, the client persists `batch_id` and associated `job_id`s in `sessionStorage` (IDs only, never document text or raw content). | `src/api/adapters.ts`, `src/app/BatchContext.tsx` | Confirm with backend team whether a batch listing/retrieval endpoint is planned. |
+| A-2 | **Role enforcement & auth (G2)**: Without a login or `/whoami` endpoint, the client accepts a bearer token and a role hint (`submitter` vs `reviewer`). Roles are enforced server-side; 403 on reviewer routes displays an explicit error message. | `src/app/AuthContext.tsx`, `src/api/client.ts` | Verify whether a future auth endpoint will return user identities and claims. |
+| A-3 | **Tolerant response shapes (G3)**: Job details, thumbnails, handoff results, and report JSON responses use tolerant Zod schemas (`passthrough()` or optional fields). Fallback renders collapsible non-sensitive JSON. Thumbnails accept URL or base64 data URI; otherwise show "Preview not provided". | `src/api/schemas.ts`, `src/api/adapters.ts` | Verify exact production schemas with backend engineers when endpoints are implemented. |
+| A-4 | **Decision POST body shape (G4)**: Decisions are submitted as `{ decisions: [...] }` containing `finding_id` or `region` along with action attributes. | `src/api/adapters.ts`, `src/api/schemas.ts` | Verify payload schema with backend team for `POST /jobs/{id}/review`. |
+| A-5 | **Progress stage string (G5)**: The `progress.stage` field is treated as an opaque string and displayed title-cased without hardcoded stage logic. | `src/domain/stateUi.ts` | Confirm server stage vocabulary if specific telemetry/stage icons are needed. |
+| A-6 | **Findings pagination (G6)**: Findings endpoint returns a single full list. UI provides virtualized scrolling to handle large finding sets efficiently. | `src/components/DataTable.tsx` | Inquire if cursor or offset pagination will be added for large documents. |
+| A-7 | **Theme tokens (Section 9.2 Step 0)**: Tokens in `src/styles/tokens.css` map Optiv brand Navy (`#0F1A3A`) and user-specified Optiv Orange (`rgba(232, 93, 31)`), body `#0A0E1A` / `#FFFFFF`, Inter font stack, 4px/8px/12px border radii. | `src/styles/tokens.css` | Confirmed with user-extracted DevTools and user-specified accent color rgba(232, 93, 31). |
+| A-8 | **Font substitution (Section 9.2 #3)**: Self-hosted `@fontsource/inter` and `@fontsource/jetbrains-mono` are used as open-source substitutes for licensed enterprise web fonts to ensure 100% offline compliance. | `src/styles/globals.css`, `index.html` | Inspect actual Optiv licensed fonts if offline webfont assets become available. |
