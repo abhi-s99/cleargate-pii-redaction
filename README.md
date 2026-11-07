@@ -3,11 +3,6 @@
 **A privacy gate between business documents and AI models.**
 ClearGate extracts text from PDFs (including scans), Word and PowerPoint files, detects and classifies personal data, redacts it with consistent tokens, verifies the result independently, and lets a document through to the AI only when it can show the document is safe.
 
-Built for the **Optiv Consulting case study: Text Analysis and PII Detection** (client scenario: Cadence Financial Group).
-
-> **Status: Phase 11 complete.** Detection, redaction, independent verification, the API and the React web UI work end to end; run `make ui` then `make run` and open http://127.0.0.1:8000 (tokens are in `.env`). The [status table](#status) is the source of truth. Progress: [docs/PROGRESS.md](docs/PROGRESS.md); test traceability: [docs/VERIFICATION.md](docs/VERIFICATION.md).
-
-[PRD](docs/PRD.md) · [Architecture & technical decisions](docs/Architecture.md) · [TRD](docs/TRD.md)
 
 ---
 
